@@ -1,0 +1,2185 @@
+Source: build/rnnoise-0.2/src/celt_lpc.c
+/* Copyright (c) 2009-2010 Xiph.Org Foundation
+   Written by Jean-Marc Valin */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+   OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "celt_lpc.h"
+#include "arch.h"
+#include "common.h"
+#include "pitch.h"
+#include "denoise.h"
+
+void rnn_lpc(
+      opus_val16       *_lpc, /* out: [0...p-1] LPC coefficients      */
+const opus_val32 *ac,  /* in:  [0...p] autocorrelation values  */
+int          p
+)
+{
+   int i, j;
+   opus_val32 r;
+   opus_val32 error = ac[0];
+#ifdef FIXED_POINT
+   opus_val32 lpc[LPC_ORDER];
+#else
+   float *lpc = _lpc;
+#endif
+
+   RNN_CLEAR(lpc, p);
+   if (ac[0] != 0)
+   {
+      for (i = 0; i < p; i++) {
+         /* Sum up this iteration's reflection coefficient */
+         opus_val32 rr = 0;
+         for (j = 0; j < i; j++)
+            rr += MULT32_32_Q31(lpc[j],ac[i - j]);
+         rr += SHR32(ac[i + 1],3);
+         r = -SHL32(rr,3)/error;
+         /*  Update LPC coefficients and total error */
+         lpc[i] = SHR32(r,3);
+         for (j = 0; j < (i+1)>>1; j++)
+         {
+            opus_val32 tmp1, tmp2;
+            tmp1 = lpc[j];
+            tmp2 = lpc[i-1-j];
+            lpc[j]     = tmp1 + MULT32_32_Q31(r,tmp2);
+            lpc[i-1-j] = tmp2 + MULT32_32_Q31(r,tmp1);
+         }
+
+         error = error - MULT32_32_Q31(MULT32_32_Q31(r,r),error);
+         /* Bail out once we get 30 dB gain */
+#ifdef FIXED_POINT
+         if (error<SHR32(ac[0],10))
+            break;
+#else
+         if (error<.001f*ac[0])
+Source: build/rnnoise-0.2/src/denoise.c
+/* Copyright (c) 2024 Jean-Marc Valin
+ * Copyright (c) 2018 Gregor Richards
+ * Copyright (c) 2017 Mozilla */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include "kiss_fft.h"
+#include "common.h"
+#include "denoise.h"
+#include <math.h>
+#include "rnnoise.h"
+#include "pitch.h"
+#include "arch.h"
+#include "rnn.h"
+#include "cpu_support.h"
+
+#define SQUARE(x) ((x)*(x))
+
+
+#ifndef TRAINING
+#define TRAINING 0
+#endif
+
+
+/* ERB bandwidths going in reverse from 20 kHz and then replacing the 700 and 800
+   with just 750 because having 32 bands is convenient for the DNN. 
+   B(1)=400;
+   for k=2:35
+     B(k) = B(k-1) - max(2, round(24.7*(4.37*B(k-1)/20+1)/50));
+   end
+   printf("%d, ", B(end:-1:1));
+   printf("\n")
+*/
+const int eband20ms[NB_BANDS+2] = {
+/*0 100 200 300 400 500 600 750 900 1.1 1.2 1.4 1.6 1.8 2.1 2.4 2.7 3.0 3.4 3.9 4.4 4.9  5.5  6.2  7.0  7.9  8.8  9.9 11.2 12.6 14.1 15.9 17.8 20.0*/
+  0, 2,  4,  6,  8,  10, 12, 15, 18, 21, 24, 28, 32, 36, 41, 47, 53, 60, 68, 77, 87, 98, 110, 124, 140, 157, 176, 198, 223, 251, 282, 317, 356, 400};
+
+
+struct DenoiseState {
+  RNNoise model;
+#if !TRAINING
+  int arch;
+#endif
+  float analysis_mem[FRAME_SIZE];
+  int memid;
+  float synthesis_mem[FRAME_SIZE];
+  float pitch_buf[PITCH_BUF_SIZE];
+  float pitch_enh_buf[PITCH_BUF_SIZE];
+  float last_gain;
+  int last_period;
+  float mem_hp_x[2];
+Source: build/rnnoise-0.2/src/dump_features.c
+/* Copyright (c) 2024 Jean-Marc Valin
+ * Copyright (c) 2017 Mozilla */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include "rnnoise.h"
+#include "common.h"
+#include "denoise.h"
+#include "arch.h"
+#include "kiss_fft.h"
+#include "src/_kiss_fft_guts.h"
+
+int lowpass = FREQ_SIZE;
+int band_lp = NB_BANDS;
+
+#define SEQUENCE_LENGTH 2000
+#define SEQUENCE_SAMPLES (SEQUENCE_LENGTH*FRAME_SIZE)
+
+#define RIR_FFT_SIZE 65536
+#define RIR_MAX_DURATION (RIR_FFT_SIZE/2)
+#define FILENAME_MAX_SIZE 1000
+
+struct rir_list {
+  int nb_rirs;
+  int block_size;
+  kiss_fft_state *fft;
+  kiss_fft_cpx **rir;
+  kiss_fft_cpx **early;
+};
+
+kiss_fft_cpx *load_rir(const char *rir_file, kiss_fft_state *fft, int early) {
+  kiss_fft_cpx *x, *X;
+  float rir[RIR_MAX_DURATION];
+  int len;
+  int i;
+  FILE *f;
+  f = fopen(rir_file, "rb");
+  if (f==NULL) {
+    fprintf(stderr, "cannot open %s: %s\n", rir_file, strerror(errno));
+    exit(1);
+  }
+  x = (kiss_fft_cpx*)calloc(fft->nfft, sizeof(*x));
+  X = (kiss_fft_cpx*)calloc(fft->nfft, sizeof(*X));
+  len = fread(rir, sizeof(*rir), RIR_MAX_DURATION, f);
+  if (early) {
+    for (i=0;i<240;i++) {
+      rir[480+i] *= (1 - i/240.f);
+    }
+Source: build/rnnoise-0.2/src/dump_rnnoise_tables.c
+/* Copyright (c) 2017-2018 Mozilla
+   Copyright (c) 2023 Amazon */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <math.h>
+#include <stdio.h>
+#include "denoise.h"
+#include "kiss_fft.h"
+
+#define OVERLAP_SIZE FRAME_SIZE
+
+int main(void) {
+  int i;
+  FILE *file;
+  kiss_fft_state *kfft;
+  float half_window[OVERLAP_SIZE];
+  float dct_table[NB_BANDS*NB_BANDS];
+
+  file=fopen("rnnoise_tables.c", "wb");
+  fprintf(file, "/* The contents of this file was automatically generated by dump_rnnoise_tables.c*/\n\n");
+  fprintf(file, "#ifdef HAVE_CONFIG_H\n");
+  fprintf(file, "#include \"config.h\"\n");
+  fprintf(file, "#endif\n");
+
+  fprintf(file, "#include \"kiss_fft.h\"\n\n");
+
+  kfft = rnn_fft_alloc_twiddles(WINDOW_SIZE, NULL, NULL, NULL, 0);
+
+  fprintf(file, "static const arch_fft_state arch_fft = {0, NULL};\n\n");
+
+  fprintf (file, "static const opus_int32 fft_bitrev[%d] = {\n", kfft->nfft);
+  for (i=0;i<kfft->nfft;i++)
+    fprintf (file, "%d,%c", kfft->bitrev[i],(i+16)%15==0?'\n':' ');
+  fprintf (file, "};\n\n");
+
+  fprintf (file, "static const kiss_twiddle_cpx fft_twiddles[%d] = {\n", kfft->nfft);
+  for (i=0;i<kfft->nfft;i++)
+    fprintf (file, "{%#0.9gf, %#0.9gf},%c", kfft->twiddles[i].r, kfft->twiddles[i].i,(i+3)%2==0?'\n':' ');
+  fprintf (file, "};\n\n");
+
+
+  fprintf(file, "const kiss_fft_state rnn_kfft = {\n");
+  fprintf(file, "%d, /* nfft */\n", kfft->nfft);
+  fprintf(file, "%#0.8gf, /* scale */\n", kfft->scale);
+  fprintf(file, "%d, /* shift */\n", kfft->shift);
+  fprintf(file, "{");
+  for (i=0;i<2*MAXFACTORS;i++) {
+    fprintf(file, "%d, ", kfft->factors[i]);
+  }
+  fprintf(file, "}, /* factors */\n");
+  fprintf(file, "fft_bitrev, /* bitrev*/\n");
+  fprintf(file, "fft_twiddles, /* twiddles*/\n");
+  fprintf(file, "(arch_fft_state *)&arch_fft, /* arch_fft*/\n");
+Source: build/rnnoise-0.2/src/kiss_fft.c
+/*Copyright (c) 2003-2004, Mark Borgerding
+  Lots of modifications by Jean-Marc Valin
+  Copyright (c) 2005-2007, Xiph.Org Foundation
+  Copyright (c) 2008,      Xiph.Org Foundation, CSIRO
+
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice,
+       this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE.*/
+
+/* This code is originally from Mark Borgerding's KISS-FFT but has been
+   heavily modified to better suit Opus */
+
+#ifndef SKIP_CONFIG_H
+#  ifdef HAVE_CONFIG_H
+#    include "config.h"
+#  endif
+#endif
+
+#include "_kiss_fft_guts.h"
+#define CUSTOM_MODES
+
+/* The guts header contains all the multiplication and addition macros that are defined for
+   complex numbers.  It also declares the kf_ internal functions.
+*/
+
+static void kf_bfly2(
+                     kiss_fft_cpx * Fout,
+                     int m,
+                     int N
+                    )
+{
+   kiss_fft_cpx * Fout2;
+   int i;
+   (void)m;
+#ifdef CUSTOM_MODES
+   if (m==1)
+   {
+      celt_assert(m==1);
+      for (i=0;i<N;i++)
+      {
+         kiss_fft_cpx t;
+         Fout2 = Fout + 1;
+         t = *Fout2;
+         C_SUB( *Fout2 ,  *Fout , t );
+         C_ADDTO( *Fout ,  t );
+         Fout += 2;
+      }
+   } else
+#endif
+   {
+      opus_val16 tw;
+      tw = QCONST16(0.7071067812f, 15);
+      /* We know that m==4 here because the radix-2 is just after a radix-4 */
+      celt_assert(m==4);
+      for (i=0;i<N;i++)
+      {
+         kiss_fft_cpx t;
+         Fout2 = Fout + 4;
+         t = Fout2[0];
+         C_SUB( Fout2[0] ,  Fout[0] , t );
+         C_ADDTO( Fout[0] ,  t );
+Source: build/rnnoise-0.2/src/nnet.c
+/* Copyright (c) 2018 Mozilla
+                 2008-2011 Octasic Inc.
+                 2012-2017 Jean-Marc Valin */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <stdlib.h>
+#include <math.h>
+#include "opus_types.h"
+#include "arch.h"
+#include "nnet.h"
+#include "common.h"
+#include "vec.h"
+
+#ifdef ENABLE_OSCE
+#include "osce.h"
+#endif
+
+#ifdef NO_OPTIMIZATIONS
+#if defined(_MSC_VER)
+#pragma message ("Compiling without any vectorization. This code will be very slow")
+#else
+#warning Compiling without any vectorization. This code will be very slow
+#endif
+#endif
+
+
+#define SOFTMAX_HACK
+
+
+void compute_generic_dense(const LinearLayer *layer, float *output, const float *input, int activation, int arch)
+{
+   compute_linear(layer, output, input, arch);
+   compute_activation(output, output, layer->nb_outputs, activation, arch);
+}
+
+#define MAX_RNN_NEURONS_ALL 1024
+
+void compute_generic_gru(const LinearLayer *input_weights, const LinearLayer *recurrent_weights, float *state, const float *in, int arch)
+{
+  int i;
+  int N;
+  float zrh[3*MAX_RNN_NEURONS_ALL];
+  float recur[3*MAX_RNN_NEURONS_ALL];
+  float *z;
+  float *r;
+  float *h;
+  celt_assert(3*recurrent_weights->nb_inputs == recurrent_weights->nb_outputs);
+  celt_assert(input_weights->nb_outputs == recurrent_weights->nb_outputs);
+  N = recurrent_weights->nb_inputs;
+  z = zrh;
+  r = &zrh[N];
+  h = &zrh[2*N];
+  celt_assert(recurrent_weights->nb_outputs <= 3*MAX_RNN_NEURONS_ALL);
+Source: build/rnnoise-0.2/src/nnet_default.c
+/* Copyright (c) 2018-2019 Mozilla
+                 2023 Amazon */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
+#define RTCD_ARCH c
+
+#include "nnet_arch.h"
+Source: build/rnnoise-0.2/src/parse_lpcnet_weights.c
+/* Copyright (c) 2023 Amazon */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <string.h>
+#include <stdlib.h>
+#include "nnet.h"
+
+#define SPARSE_BLOCK_SIZE 32
+
+static int parse_record(const void **data, int *len, WeightArray *array) {
+  WeightHead *h = (WeightHead *)*data;
+  if (*len < WEIGHT_BLOCK_SIZE) return -1;
+  if (h->block_size < h->size) return -1;
+  if (h->block_size > *len-WEIGHT_BLOCK_SIZE) return -1;
+  if (h->name[sizeof(h->name)-1] != 0) return -1;
+  if (h->size < 0) return -1;
+  array->name = h->name;
+  array->type = h->type;
+  array->size = h->size;
+  array->data = (void*)((unsigned char*)(*data)+WEIGHT_BLOCK_SIZE);
+
+  *data = (void*)((unsigned char*)*data + h->block_size+WEIGHT_BLOCK_SIZE);
+  *len -= h->block_size+WEIGHT_BLOCK_SIZE;
+  return array->size;
+}
+
+int parse_weights(WeightArray **list, const void *data, int len)
+{
+  int nb_arrays=0;
+  int capacity=20;
+  *list = calloc(capacity*sizeof(WeightArray), 1);
+  while (len > 0) {
+    int ret;
+    WeightArray array = {NULL, 0, 0, 0};
+    ret = parse_record(&data, &len, &array);
+    if (ret > 0) {
+      if (nb_arrays+1 >= capacity) {
+        /* Make sure there's room for the ending NULL element too. */
+        capacity = capacity*3/2;
+        *list = realloc(*list, capacity*sizeof(WeightArray));
+      }
+      (*list)[nb_arrays++] = array;
+    } else {
+      free(*list);
+      *list = NULL;
+      return -1;
+    }
+  }
+  (*list)[nb_arrays].name=NULL;
+  return nb_arrays;
+}
+
+static const void *find_array_entry(const WeightArray *arrays, const char *name) {
+Source: build/rnnoise-0.2/src/pitch.c
+/* Copyright (c) 2007-2008 CSIRO
+   Copyright (c) 2007-2009 Xiph.Org Foundation
+   Written by Jean-Marc Valin */
+/**
+   @file pitch.c
+   @brief Pitch analysis
+ */
+
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+   OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "pitch.h"
+#include "common.h"
+#include "denoise.h"
+#include "celt_lpc.h"
+#include "math.h"
+
+static void find_best_pitch(opus_val32 *xcorr, opus_val16 *y, int len,
+                            int max_pitch, int *best_pitch
+#ifdef FIXED_POINT
+                            , int yshift, opus_val32 maxcorr
+#endif
+                            )
+{
+   int i, j;
+   opus_val32 Syy=1;
+   opus_val16 best_num[2];
+   opus_val32 best_den[2];
+#ifdef FIXED_POINT
+   int xshift;
+
+   xshift = celt_ilog2(maxcorr)-14;
+#endif
+
+   best_num[0] = -1;
+   best_num[1] = -1;
+   best_den[0] = 0;
+   best_den[1] = 0;
+   best_pitch[0] = 0;
+   best_pitch[1] = 1;
+   for (j=0;j<len;j++)
+      Syy = ADD32(Syy, SHR32(MULT16_16(y[j],y[j]), yshift));
+   for (i=0;i<max_pitch;i++)
+   {
+      if (xcorr[i]>0)
+      {
+         opus_val16 num;
+         opus_val32 xcorr16;
+         xcorr16 = EXTRACT16(VSHR32(xcorr[i], xshift));
+#ifndef FIXED_POINT
+         /* Considering the range of xcorr16, this should avoid both underflows
+            and overflows (inf) when squaring xcorr16 */
+         xcorr16 *= 1e-12f;
+#endif
+Source: build/rnnoise-0.2/src/rnn.c
+/* Copyright (c) 2008-2011 Octasic Inc.
+                 2012-2017 Jean-Marc Valin */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <math.h>
+#include "opus_types.h"
+#include "common.h"
+#include "arch.h"
+#include "rnn.h"
+#include "rnnoise_data.h"
+#include <stdio.h>
+
+
+#define INPUT_SIZE 42
+
+
+void compute_rnn(const RNNoise *model, RNNState *rnn, float *gains, float *vad, const float *input, int arch) {
+  float tmp[MAX_NEURONS];
+  float tmp2[MAX_NEURONS];
+  /*for (int i=0;i<INPUT_SIZE;i++) printf("%f ", input[i]);printf("\n");*/
+  compute_generic_conv1d(&model->conv1, tmp, rnn->conv1_state, input, CONV1_IN_SIZE, ACTIVATION_TANH, arch);
+  compute_generic_conv1d(&model->conv2, tmp2, rnn->conv2_state, tmp, CONV2_IN_SIZE, ACTIVATION_TANH, arch);
+  compute_generic_gru(&model->gru1_input, &model->gru1_recurrent, rnn->gru1_state, tmp2, arch);
+  compute_generic_gru(&model->gru2_input, &model->gru2_recurrent, rnn->gru2_state, rnn->gru1_state, arch);
+  compute_generic_gru(&model->gru3_input, &model->gru3_recurrent, rnn->gru3_state, rnn->gru2_state, arch);
+  compute_generic_dense(&model->dense_out, gains, rnn->gru3_state, ACTIVATION_SIGMOID, arch);
+  compute_generic_dense(&model->vad_dense, vad, rnn->gru3_state, ACTIVATION_SIGMOID, arch);
+  /*for (int i=0;i<22;i++) printf("%f ", gains[i]);printf("\n");*/
+  /*printf("%f\n", *vad);*/
+}
+Source: build/rnnoise-0.2/src/rnnoise_data.c
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "rnnoise_data.h"
+
+
+#ifndef USE_WEIGHTS_FILE
+
+#define WEIGHTS_conv1_weights_float_DEFINED
+#define WEIGHTS_conv1_weights_float_TYPE WEIGHT_TYPE_float
+static const float conv1_weights_float[24960] = {
+    0.017067527398467064, -0.0075201536528766155, -0.004641992039978504, 0.003118357388302684, 0.007930063642561436, -0.04757816717028618, 0.027245942503213882, -0.058781709522008896,
+    -0.04250109940767288, -0.00456750625744462, 0.016618963330984116, -0.015199024230241776, 0.06048556789755821, 0.03194425255060196, 0.06064014136791229, 0.05970624089241028,
+    0.01130896620452404, -0.001807725871913135, -0.006320847664028406, 0.025784334167838097, 0.03459395468235016, -0.039262887090444565, 0.031072838231921196, -0.027256986126303673,
+    -0.03999316319823265, 0.0164959579706192, -0.014000890776515007, -0.0629119724035263, 0.0207250714302063, 0.051833510398864746, -0.0070905741304159164, 0.0027564342599362135,
+    0.011550871655344963, 0.01938730664551258, 0.025868520140647888, 0.05988603085279465, -0.011479596607387066, -0.013402817770838737, 0.02675125002861023, -0.03325110673904419,
+    -0.044895801693201065, -0.0019379912409931421, 0.0030525897163897753, -0.056626491248607635, -0.08306550979614258, 0.011977829039096832, -0.12744168937206268, -0.017554515972733498,
+    -0.008490747772157192, -0.09090171754360199, -0.012199737131595612, 0.08705215156078339, 0.005497656296938658, 0.04583197087049484, -0.044803500175476074, -0.02210887335240841,
+    -0.07484690845012665, -0.01989956758916378, -0.023241076618433, -0.1165221631526947, 0.16566267609596252, 0.016500990837812424, -0.029439009726047516, 0.024810699746012688,
+    0.023893848061561584, -0.058041125535964966, -0.017588166519999504, 0.03199947997927666, 0.014394555240869522, -0.0427137054502964, -0.017908820882439613, -0.05435529351234436,
+    -0.006833154242485762, -0.03487752750515938, 0.019758861511945724, 0.02732403576374054, 0.06692714244127274, 0.01815481297671795, 0.09394443780183792, 0.026075147092342377,
+    -0.005495466757565737, -0.06199938431382179, -0.016809457913041115, 0.04281154274940491, -0.0331311859190464, 0.09776781499385834, -0.10349451750516891, -0.04535288363695145,
+    -0.0175930168479681, 0.043771255761384964, 0.003200017847120762, -0.047546107321977615, 0.04964360594749451, -0.003108870005235076, 0.015285782516002655, -0.00020159738778602332,
+    0.03287887200713158, -0.06268925964832306, -0.12507113814353943, -0.0044255307875573635, 0.11522523313760757, -0.01226806826889515, 0.041270650923252106, 0.00013585842680186033,
+    0.008941605687141418, -0.03953743353486061, 0.0066193281672894955, 0.13030432164669037, 0.06583581864833832, 0.03128695487976074, -0.01765059307217598, 0.007956290617585182,
+    -0.1233857274055481, -0.07752712815999985, -0.0018903790041804314, -0.07837482541799545, -0.05796122923493385, -0.014670690521597862, 0.012251162901520729, -0.013188525103032589,
+    -0.0019845732022076845, 0.06570489704608917, -0.040558964014053345, -0.021815476939082146, -0.018174776807427406, -0.03940766304731369, 0.03281994163990021, -0.08661500364542007,
+    0.056666549295186996, -0.040104351937770844, 0.034756992012262344, -0.006996986921876669, -0.03805800527334213, 0.018626220524311066, 0.015320027247071266, -0.018687298521399498,
+    -0.07234373688697815, -0.07004222273826599, 0.031841080635786057, 0.01285267248749733, 0.015615652315318584, -0.017254626378417015, 0.04602619633078575, -0.05215892195701599,
+    0.05947883799672127, -0.002955301431939006, 0.08592528104782104, -0.025729583576321602, -0.003995742183178663, -0.0658951848745346, 0.07702983915805817, 0.025051457807421684,
+    0.007831241004168987, 0.03064187802374363, 0.021163757890462875, 0.07133466750383377, 0.0016592543106526136, 0.010233646258711815, -0.036707568913698196, 0.017396507784724236,
+    -0.006465650629252195, -0.017947841435670853, -0.009166496805846691, 0.07701452821493149, 0.0153252724558115, 0.043578535318374634, 0.07800809293985367, -0.03793419152498245,
+    0.020713992416858673, 0.04830608889460564, -0.0194970965385437, -0.0433582179248333, 0.06807548552751541, -0.03270381689071655, 0.08384036272764206, 0.050760652869939804,
+    0.020517952740192413, -0.070602647960186, -0.050636112689971924, -0.03595026209950447, -0.004638501442968845, 0.12363727390766144, -0.09452686458826065, 0.014301523566246033,
+    0.0021892415825277567, -0.009174766018986702, 0.03255457058548927, -0.07259976863861084, -0.034242548048496246, -0.02236516959965229, -0.022449053823947906, 0.020966248586773872,
+    0.029756590723991394, -0.041784219443798065, -0.0044095697812736034, 0.026833737269043922, 0.0003754550125449896, 0.05746478587388992, -0.009739553555846214, 0.02949981577694416,
+    0.017181336879730225, 0.02702164091169834, 0.012777877040207386, 0.02035016380250454, -0.05259073153138161, -0.037682972848415375, 0.04029162973165512, 0.0014618032146245241,
+    -0.048450976610183716, 0.021254941821098328, 0.007073278538882732, 0.013242061249911785, 0.0637165755033493, 0.020039547234773636, -0.05688896402716637, -0.08401686698198318,
+    -0.006352518685162067, 0.016188308596611023, -0.015045931562781334, 0.05342170223593712, -0.008018645457923412, -0.005790251307189465, 0.0486861914396286, 0.018422013148665428,
+    0.046293653547763824, -0.013143873773515224, 0.04211192950606346, -0.011591046117246151, 0.06302523612976074, 0.012978334911167622, 0.02533559501171112, 0.0036832469049841166,
+    -0.03227176144719124, 0.01415002066642046, 0.00906218308955431, 0.11442038416862488, -0.09040628373622894, -0.009918770752847195, -0.06207247078418732, -0.04007014259696007,
+    -0.20302307605743408, 0.04508329927921295, -0.013372965157032013, 0.034609355032444, 0.014536645263433456, -0.037746280431747437, -0.06946118921041489, -0.010904494673013687,
+    -0.00916423462331295, -0.03992898762226105, -0.027865227311849594, -0.003926893230527639, -0.01487791258841753, 0.029879439622163773, -0.0336240753531456, -0.0008041657274588943,
+    0.038125570863485336, -0.08523451536893845, -0.014954824000597, -0.04978681728243828, -0.05313912779092789, 0.045395635068416595, 0.07125388830900192, 0.02347843535244465,
+    0.04491865262389183, -0.016287483274936676, 0.004267233423888683, -0.02732202038168907, -0.006278051529079676, -0.08225098252296448, 0.009819683618843555, 0.09379643946886063,
+    -0.0001232670183526352, -0.019285455346107483, -0.06283347308635712, -0.01980285346508026, -0.021808121353387833, 0.053720854222774506, -0.0013472592690959573, 0.0029614553786814213,
+    0.011219209991395473, -0.07434139400720596, -0.02469658851623535, 0.04646073654294014, 0.07229986786842346, 0.04012773185968399, -0.015145808458328247, 0.04733544588088989,
+    -0.010851167142391205, -0.052182722836732864, 0.08475326001644135, 0.026024863123893738, -0.0018572439439594746, -0.05121581628918648, 0.018115904182195663, -0.007734646555036306,
+    -0.027704481035470963, 0.04081578180193901, -0.01677200384438038, 0.03161365166306496, 0.002750249346718192, -0.0022123921662569046, -0.0738799199461937, -0.03564099222421646,
+    0.023967817425727844, 0.025053512305021286, -0.026020659133791924, 0.06934358179569244, -0.0073950220830738544, -0.0519658699631691, -0.004143245983868837, -0.0014055832289159298,
+    0.07706207782030106, -0.00723298080265522, -0.023669203743338585, 0.1366502046585083, -0.13767880201339722, -0.04113408550620079, 0.032280340790748596, -0.06524298340082169,
+    -0.061147477477788925, -0.032700635492801666, -0.020603889599442482, 0.00104508176445961, 0.026289042085409164, 0.01561687607318163, 0.0032073287293314934, 0.04615490138530731,
+    0.025989193469285965, -0.0604148805141449, -8.664008782943711e-05, -0.0070301746018230915, -0.02013900876045227, 0.0822862833738327, -0.045252345502376556, 0.010582328774034977,
+    0.03726879134774208, 0.034397535026073456, -0.002237277338281274, 0.008027243427932262, 0.05005273222923279, 0.004636405035853386, -0.0550849549472332, -0.0022283054422587156,
+    0.022153450176119804, 0.0419180728495121, -0.02982473373413086, -0.034104008227586746, -0.11392366141080856, 0.05393396317958832, -0.0037459793966263533, 0.09340675920248032,
+    -0.08375167101621628, -0.023899095132946968, 0.05006250739097595, -0.021984005346894264, -0.025465339422225952, -0.0065496088936924934, -0.06543637067079544, 0.030339568853378296,
+    0.06061937287449837, 0.08087268471717834, -0.009180685505270958, 0.08648819476366043, -0.05735556781291962, 0.04315461590886116, 0.010109052993357182, -0.02489919774234295,
+    0.03415096178650856, -0.036725033074617386, -0.005248628091067076, -0.048235390335321426, 0.04593051224946976, -0.08635451644659042, -0.007875636219978333, 0.06415502727031708,
+    -0.04965560510754585, 0.10815900564193726, -0.023982420563697815, 0.03822923079133034, 0.010517574846744537, -0.025241339579224586, 0.006105267908424139, -0.019890690222382545,
+    0.10333722829818726, 0.009463788010179996, 0.06789916008710861, 0.013596630655229092, -0.03818737342953682, 0.0359995998442173, -0.03255708888173103, 0.026521962136030197,
+    0.028178885579109192, 0.06296474486589432, -0.018065301701426506, 0.010473902337253094, -0.00587108638137579, 1.813337621570099e-05, -0.12192954868078232, 0.0904402807354927,
+    0.046065010130405426, 0.028307363390922546, -0.004258437547832727, 0.034422602504491806, -0.010124864988029003, -0.09436263889074326, -0.122008316218853, -0.023489555343985558,
+    -0.06975235790014267, 0.007949764840304852, -0.014363361522555351, 0.08404510468244553, 0.00415752362459898, -0.008626511320471764, 0.04890643060207367, -0.0169692263007164,
+    -0.027723757550120354, -0.07394617050886154, -0.016378510743379593, -0.01312238723039627, -0.025171473622322083, -0.026142021641135216, 0.032316748052835464, 0.010206988081336021,
+    0.012052892707288265, -0.05144692212343216, -0.008106488734483719, -0.010772336274385452, -0.05380132421851158, -0.07050475478172302, -0.029269857332110405, -0.02066098526120186,
+    -0.025305772200226784, 0.020823724567890167, -0.07045385241508484, 0.013145701959729195, 0.017071623355150223, -0.05146273225545883, -0.05348343774676323, 0.025577519088983536,
+    -0.00139673613011837, 0.012006308883428574, 0.015129582025110722, -0.02084086276590824, 0.04162249341607094, -0.01347898319363594, 0.015163072384893894, 0.05652904137969017,
+    0.0446067750453949, 0.12849104404449463, -0.0628960058093071, 0.03840458765625954, 0.0039866832084953785, -0.007909963838756084, -0.039329737424850464, -0.03171854093670845,
+    -0.043580006808042526, 0.020233601331710815, -0.00952962413430214, 0.05069613829255104, -0.039645321667194366, 0.001174254692159593, -0.016958054155111313, -0.027903562411665916,
+    -0.0355493426322937, -0.0038989451713860035, 0.04365377500653267, -0.0060323686338961124, -0.054615411907434464, -0.008725576102733612, 0.043010737746953964, -0.010906502604484558,
+    0.01947830058634281, 0.08709561079740524, 0.031692806631326675, 0.09907978028059006, 0.03377656266093254, 0.0260359775274992, 0.006338734179735184, -0.019959239289164543,
+    -0.08946377784013748, -0.0073864455334842205, -0.15329426527023315, 0.017869649454951286, 0.01810905896127224, -0.03307364881038666, 0.08793262392282486, -0.005825376138091087,
+    -0.029502013698220253, 0.006687430664896965, -0.03707011416554451, -0.023735368624329567, 0.08755191415548325, 0.04096467047929764, -0.002990532200783491, 0.03481287136673927,
+    0.024398256093263626, 0.05466083809733391, -0.000859878200571984, -0.05571391433477402, 0.00036600511521101, -0.008032645098865032, -0.021417753770947456, 0.07693352550268173,
+    0.03533005714416504, -0.0562145859003067, -0.003345569595694542, 0.0028612343594431877, 0.040780577808618546, -0.023584827780723572, -0.038021672517061234, 0.011381609365344048,
+    -0.045908477157354355, -0.004584841430187225, -0.0014370277058333158, 0.08647330850362778, -0.015317513607442379, -0.055577125400304794, 0.018601108342409134, 0.015124470926821232,
+    -0.027152447029948235, -0.04253007099032402, -0.008762059733271599, -0.005470105912536383, 0.024789096787571907, 0.09968028217554092, -0.022201087325811386, -0.09958170354366302,
+    0.050703611224889755, -0.0287419855594635, 0.04270603507757187, -0.0816933810710907, 0.018675871193408966, 0.12212598323822021, 0.1422845870256424, 0.06386247277259827,
+Source: build/rnnoise-0.2/src/rnnoise_tables.c
+/* The contents of this file was automatically generated by dump_rnnoise_tables.c*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#include "kiss_fft.h"
+
+static const arch_fft_state arch_fft = {0, NULL};
+
+static const opus_int32 fft_bitrev[960] = {
+0, 192, 384, 576, 768, 64, 256, 448, 640, 832, 128, 320, 512, 704, 896,
+16, 208, 400, 592, 784, 80, 272, 464, 656, 848, 144, 336, 528, 720, 912,
+32, 224, 416, 608, 800, 96, 288, 480, 672, 864, 160, 352, 544, 736, 928,
+48, 240, 432, 624, 816, 112, 304, 496, 688, 880, 176, 368, 560, 752, 944,
+4, 196, 388, 580, 772, 68, 260, 452, 644, 836, 132, 324, 516, 708, 900,
+20, 212, 404, 596, 788, 84, 276, 468, 660, 852, 148, 340, 532, 724, 916,
+36, 228, 420, 612, 804, 100, 292, 484, 676, 868, 164, 356, 548, 740, 932,
+52, 244, 436, 628, 820, 116, 308, 500, 692, 884, 180, 372, 564, 756, 948,
+8, 200, 392, 584, 776, 72, 264, 456, 648, 840, 136, 328, 520, 712, 904,
+24, 216, 408, 600, 792, 88, 280, 472, 664, 856, 152, 344, 536, 728, 920,
+40, 232, 424, 616, 808, 104, 296, 488, 680, 872, 168, 360, 552, 744, 936,
+56, 248, 440, 632, 824, 120, 312, 504, 696, 888, 184, 376, 568, 760, 952,
+12, 204, 396, 588, 780, 76, 268, 460, 652, 844, 140, 332, 524, 716, 908,
+28, 220, 412, 604, 796, 92, 284, 476, 668, 860, 156, 348, 540, 732, 924,
+44, 236, 428, 620, 812, 108, 300, 492, 684, 876, 172, 364, 556, 748, 940,
+60, 252, 444, 636, 828, 124, 316, 508, 700, 892, 188, 380, 572, 764, 956,
+1, 193, 385, 577, 769, 65, 257, 449, 641, 833, 129, 321, 513, 705, 897,
+17, 209, 401, 593, 785, 81, 273, 465, 657, 849, 145, 337, 529, 721, 913,
+33, 225, 417, 609, 801, 97, 289, 481, 673, 865, 161, 353, 545, 737, 929,
+49, 241, 433, 625, 817, 113, 305, 497, 689, 881, 177, 369, 561, 753, 945,
+5, 197, 389, 581, 773, 69, 261, 453, 645, 837, 133, 325, 517, 709, 901,
+21, 213, 405, 597, 789, 85, 277, 469, 661, 853, 149, 341, 533, 725, 917,
+37, 229, 421, 613, 805, 101, 293, 485, 677, 869, 165, 357, 549, 741, 933,
+53, 245, 437, 629, 821, 117, 309, 501, 693, 885, 181, 373, 565, 757, 949,
+9, 201, 393, 585, 777, 73, 265, 457, 649, 841, 137, 329, 521, 713, 905,
+25, 217, 409, 601, 793, 89, 281, 473, 665, 857, 153, 345, 537, 729, 921,
+41, 233, 425, 617, 809, 105, 297, 489, 681, 873, 169, 361, 553, 745, 937,
+57, 249, 441, 633, 825, 121, 313, 505, 697, 889, 185, 377, 569, 761, 953,
+13, 205, 397, 589, 781, 77, 269, 461, 653, 845, 141, 333, 525, 717, 909,
+29, 221, 413, 605, 797, 93, 285, 477, 669, 861, 157, 349, 541, 733, 925,
+45, 237, 429, 621, 813, 109, 301, 493, 685, 877, 173, 365, 557, 749, 941,
+61, 253, 445, 637, 829, 125, 317, 509, 701, 893, 189, 381, 573, 765, 957,
+2, 194, 386, 578, 770, 66, 258, 450, 642, 834, 130, 322, 514, 706, 898,
+18, 210, 402, 594, 786, 82, 274, 466, 658, 850, 146, 338, 530, 722, 914,
+34, 226, 418, 610, 802, 98, 290, 482, 674, 866, 162, 354, 546, 738, 930,
+50, 242, 434, 626, 818, 114, 306, 498, 690, 882, 178, 370, 562, 754, 946,
+6, 198, 390, 582, 774, 70, 262, 454, 646, 838, 134, 326, 518, 710, 902,
+22, 214, 406, 598, 790, 86, 278, 470, 662, 854, 150, 342, 534, 726, 918,
+38, 230, 422, 614, 806, 102, 294, 486, 678, 870, 166, 358, 550, 742, 934,
+54, 246, 438, 630, 822, 118, 310, 502, 694, 886, 182, 374, 566, 758, 950,
+10, 202, 394, 586, 778, 74, 266, 458, 650, 842, 138, 330, 522, 714, 906,
+26, 218, 410, 602, 794, 90, 282, 474, 666, 858, 154, 346, 538, 730, 922,
+42, 234, 426, 618, 810, 106, 298, 490, 682, 874, 170, 362, 554, 746, 938,
+58, 250, 442, 634, 826, 122, 314, 506, 698, 890, 186, 378, 570, 762, 954,
+14, 206, 398, 590, 782, 78, 270, 462, 654, 846, 142, 334, 526, 718, 910,
+30, 222, 414, 606, 798, 94, 286, 478, 670, 862, 158, 350, 542, 734, 926,
+46, 238, 430, 622, 814, 110, 302, 494, 686, 878, 174, 366, 558, 750, 942,
+62, 254, 446, 638, 830, 126, 318, 510, 702, 894, 190, 382, 574, 766, 958,
+3, 195, 387, 579, 771, 67, 259, 451, 643, 835, 131, 323, 515, 707, 899,
+19, 211, 403, 595, 787, 83, 275, 467, 659, 851, 147, 339, 531, 723, 915,
+35, 227, 419, 611, 803, 99, 291, 483, 675, 867, 163, 355, 547, 739, 931,
+51, 243, 435, 627, 819, 115, 307, 499, 691, 883, 179, 371, 563, 755, 947,
+7, 199, 391, 583, 775, 71, 263, 455, 647, 839, 135, 327, 519, 711, 903,
+23, 215, 407, 599, 791, 87, 279, 471, 663, 855, 151, 343, 535, 727, 919,
+39, 231, 423, 615, 807, 103, 295, 487, 679, 871, 167, 359, 551, 743, 935,
+55, 247, 439, 631, 823, 119, 311, 503, 695, 887, 183, 375, 567, 759, 951,
+11, 203, 395, 587, 779, 75, 267, 459, 651, 843, 139, 331, 523, 715, 907,
+27, 219, 411, 603, 795, 91, 283, 475, 667, 859, 155, 347, 539, 731, 923,
+43, 235, 427, 619, 811, 107, 299, 491, 683, 875, 171, 363, 555, 747, 939,
+59, 251, 443, 635, 827, 123, 315, 507, 699, 891, 187, 379, 571, 763, 955,
+15, 207, 399, 591, 783, 79, 271, 463, 655, 847, 143, 335, 527, 719, 911,
+31, 223, 415, 607, 799, 95, 287, 479, 671, 863, 159, 351, 543, 735, 927,
+47, 239, 431, 623, 815, 111, 303, 495, 687, 879, 175, 367, 559, 751, 943,
+63, 255, 447, 639, 831, 127, 319, 511, 703, 895, 191, 383, 575, 767, 959,
+};
+
+static const kiss_twiddle_cpx fft_twiddles[960] = {
+{1.00000000f, -0.00000000f}, {0.999978602f, -0.00654493785f},
+{0.999914348f, -0.0130895954f}, {0.999807239f, -0.0196336918f},
+{0.999657333f, -0.0261769481f}, {0.999464571f, -0.0327190831f},
+Source: build/rnnoise-0.2/src/write_weights.c
+/* Copyright (c) 2023 Amazon */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <stdio.h>
+#include <string.h>
+#include <stddef.h>
+#include "nnet.h"
+#include "arch.h"
+#include "nnet.h"
+
+/* This is a bit of a hack because we need to build nnet_data.c and plc_data.c without USE_WEIGHTS_FILE,
+   but USE_WEIGHTS_FILE is defined in config.h. */
+#undef HAVE_CONFIG_H
+#ifdef USE_WEIGHTS_FILE
+#undef USE_WEIGHTS_FILE
+#endif
+#include "rnnoise_data.c"
+
+void write_weights(const WeightArray *list, FILE *fout)
+{
+  int i=0;
+  unsigned char zeros[WEIGHT_BLOCK_SIZE] = {0};
+  while (list[i].name != NULL) {
+    WeightHead h;
+    if (strlen(list[i].name) >= sizeof(h.name) - 1) {
+      printf("[write_weights] warning: name %s too long\n", list[i].name);
+    }
+    memcpy(h.head, "DNNw", 4);
+    h.version = WEIGHT_BLOB_VERSION;
+    h.type = list[i].type;
+    h.size = list[i].size;
+    h.block_size = (h.size+WEIGHT_BLOCK_SIZE-1)/WEIGHT_BLOCK_SIZE*WEIGHT_BLOCK_SIZE;
+    RNN_CLEAR(h.name, sizeof(h.name));
+    strncpy(h.name, list[i].name, sizeof(h.name));
+    h.name[sizeof(h.name)-1] = 0;
+    celt_assert(sizeof(h) == WEIGHT_BLOCK_SIZE);
+    fwrite(&h, 1, WEIGHT_BLOCK_SIZE, fout);
+    fwrite(list[i].data, 1, h.size, fout);
+    fwrite(zeros, 1, h.block_size-h.size, fout);
+    i++;
+  }
+}
+
+int main(void)
+{
+  FILE *fout = fopen("weights_blob.bin", "w");
+  write_weights(rnnoise_arrays, fout);
+  fclose(fout);
+  return 0;
+}
+Source: build/rnnoise-0.2/src/_kiss_fft_guts.h
+/*Copyright (c) 2003-2004, Mark Borgerding
+
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice,
+       this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE.*/
+
+#ifndef KISS_FFT_GUTS_H
+#define KISS_FFT_GUTS_H
+
+#define MIN(a,b) ((a)<(b) ? (a):(b))
+#define MAX(a,b) ((a)>(b) ? (a):(b))
+
+/* kiss_fft.h
+   defines kiss_fft_scalar as either short or a float type
+   and defines
+   typedef struct { kiss_fft_scalar r; kiss_fft_scalar i; }kiss_fft_cpx; */
+#include "kiss_fft.h"
+
+/*
+  Explanation of macros dealing with complex math:
+
+   C_MUL(m,a,b)         : m = a*b
+   C_FIXDIV( c , div )  : if a fixed point impl., c /= div. noop otherwise
+   C_SUB( res, a,b)     : res = a - b
+   C_SUBFROM( res , a)  : res -= a
+   C_ADDTO( res , a)    : res += a
+ * */
+#ifdef FIXED_POINT
+#include "arch.h"
+
+
+#define SAMP_MAX 2147483647
+#define TWID_MAX 32767
+#define TRIG_UPSCALE 1
+
+#define SAMP_MIN -SAMP_MAX
+
+
+#   define S_MUL(a,b) MULT16_32_Q15(b, a)
+
+#   define C_MUL(m,a,b) \
+      do{ (m).r = SUB32_ovflw(S_MUL((a).r,(b).r) , S_MUL((a).i,(b).i)); \
+          (m).i = ADD32_ovflw(S_MUL((a).r,(b).i) , S_MUL((a).i,(b).r)); }while(0)
+
+#   define C_MULC(m,a,b) \
+      do{ (m).r = ADD32_ovflw(S_MUL((a).r,(b).r) , S_MUL((a).i,(b).i)); \
+          (m).i = SUB32_ovflw(S_MUL((a).i,(b).r) , S_MUL((a).r,(b).i)); }while(0)
+
+#   define C_MULBYSCALAR( c, s ) \
+      do{ (c).r =  S_MUL( (c).r , s ) ;\
+          (c).i =  S_MUL( (c).i , s ) ; }while(0)
+
+#   define DIVSCALAR(x,k) \
+        (x) = S_MUL(  x, (TWID_MAX-((k)>>1))/(k)+1 )
+
+#   define C_FIXDIV(c,div) \
+        do {    DIVSCALAR( (c).r , div);  \
+                DIVSCALAR( (c).i  , div); }while (0)
+
+#define  C_ADD( res, a,b)\
+    do {(res).r=ADD32_ovflw((a).r,(b).r);  (res).i=ADD32_ovflw((a).i,(b).i); \
+Source: build/rnnoise-0.2/src/arch.h
+/* Copyright (c) 2003-2008 Jean-Marc Valin
+   Copyright (c) 2007-2008 CSIRO
+   Copyright (c) 2007-2009 Xiph.Org Foundation
+   Written by Jean-Marc Valin */
+/**
+   @file arch.h
+   @brief Various architecture definitions for CELT
+*/
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+   OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifndef ARCH_H
+#define ARCH_H
+
+#include "opus_types.h"
+#include "common.h"
+
+# if !defined(__GNUC_PREREQ)
+#  if defined(__GNUC__)&&defined(__GNUC_MINOR__)
+#   define __GNUC_PREREQ(_maj,_min) \
+ ((__GNUC__<<16)+__GNUC_MINOR__>=((_maj)<<16)+(_min))
+#  else
+#   define __GNUC_PREREQ(_maj,_min) 0
+#  endif
+# endif
+
+#define CELT_SIG_SCALE 32768.f
+
+#define celt_fatal(str) _celt_fatal(str, __FILE__, __LINE__);
+#ifdef ENABLE_ASSERTIONS
+#include <stdio.h>
+#include <stdlib.h>
+#ifdef __GNUC__
+__attribute__((noreturn))
+#endif
+static OPUS_INLINE void _celt_fatal(const char *str, const char *file, int line)
+{
+   fprintf (stderr, "Fatal (internal) error in %s, line %d: %s\n", file, line, str);
+   abort();
+}
+#define celt_assert(cond) {if (!(cond)) {celt_fatal("assertion failed: " #cond);}}
+#define celt_assert2(cond, message) {if (!(cond)) {celt_fatal("assertion failed: " #cond "\n" message);}}
+#else
+#define celt_assert(cond)
+#define celt_assert2(cond, message)
+#endif
+
+#define IMUL32(a,b) ((a)*(b))
+
+#define MIN16(a,b) ((a) < (b) ? (a) : (b))   /**< Minimum 16-bit value.   */
+#define MAX16(a,b) ((a) > (b) ? (a) : (b))   /**< Maximum 16-bit value.   */
+#define MIN32(a,b) ((a) < (b) ? (a) : (b))   /**< Minimum 32-bit value.   */
+#define MAX32(a,b) ((a) > (b) ? (a) : (b))   /**< Maximum 32-bit value.   */
+#define IMIN(a,b) ((a) < (b) ? (a) : (b))   /**< Minimum int value.   */
+#define IMAX(a,b) ((a) > (b) ? (a) : (b))   /**< Maximum int value.   */
+#define UADD32(a,b) ((a)+(b))
+#define USUB32(a,b) ((a)-(b))
+
+Source: build/rnnoise-0.2/src/celt_lpc.h
+/* Copyright (c) 2009-2010 Xiph.Org Foundation
+   Written by Jean-Marc Valin */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+   OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifndef PLC_H
+#define PLC_H
+
+#include "arch.h"
+#include "common.h"
+
+#if defined(OPUS_X86_MAY_HAVE_SSE4_1)
+#include "x86/celt_lpc_sse.h"
+#endif
+
+#define LPC_ORDER 24
+
+void rnn_lpc(opus_val16 *_lpc, const opus_val32 *ac, int p);
+
+int rnn_autocorr(const opus_val16 *x, opus_val32 *ac,
+         const opus_val16 *window, int overlap, int lag, int n);
+
+#endif /* PLC_H */
+Source: build/rnnoise-0.2/src/common.h
+
+
+#ifndef COMMON_H
+#define COMMON_H
+
+#include "stdlib.h"
+#include "string.h"
+
+#define RNN_INLINE inline
+#define OPUS_INLINE inline
+
+
+/** RNNoise wrapper for malloc(). To do your own dynamic allocation, all you need t
+o do is replace this function and rnnoise_free */
+#ifndef OVERRIDE_RNNOISE_ALLOC
+static RNN_INLINE void *rnnoise_alloc (size_t size)
+{
+   return malloc(size);
+}
+#endif
+
+/** RNNoise wrapper for free(). To do your own dynamic allocation, all you need to do is replace this function and rnnoise_alloc */
+#ifndef OVERRIDE_RNNOISE_FREE
+static RNN_INLINE void rnnoise_free (void *ptr)
+{
+   free(ptr);
+}
+#endif
+
+/** Copy n elements from src to dst. The 0* term provides compile-time type checking  */
+#ifndef OVERRIDE_RNN_COPY
+#define RNN_COPY(dst, src, n) (memcpy((dst), (src), (n)*sizeof(*(dst)) + 0*((dst)-(src)) ))
+#endif
+
+/** Copy n elements from src to dst, allowing overlapping regions. The 0* term
+    provides compile-time type checking */
+#ifndef OVERRIDE_RNN_MOVE
+#define RNN_MOVE(dst, src, n) (memmove((dst), (src), (n)*sizeof(*(dst)) + 0*((dst)-(src)) ))
+#endif
+
+/** Set n elements of dst to zero */
+#ifndef OVERRIDE_RNN_CLEAR
+#define RNN_CLEAR(dst, n) (memset((dst), 0, (n)*sizeof(*(dst))))
+#endif
+
+
+
+#endif
+Source: build/rnnoise-0.2/src/cpu_support.h
+/* Copyright (c) 2010 Xiph.Org Foundation
+ * Copyright (c) 2013 Parrot */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+   OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifndef CPU_SUPPORT_H
+#define CPU_SUPPORT_H
+
+#include "opus_types.h"
+#include "common.h"
+
+#ifdef RNN_ENABLE_X86_RTCD
+
+#include "x86/x86cpu.h"
+/* We currently support 5 x86 variants:
+ * arch[0] -> sse2
+ * arch[1] -> sse4.1
+ * arch[2] -> avx2
+ */
+#define OPUS_ARCHMASK 3
+int rnn_select_arch(void);
+
+#else
+#define OPUS_ARCHMASK 0
+
+static OPUS_INLINE int rnn_select_arch(void)
+{
+  return 0;
+}
+#endif
+#endif
+Source: build/rnnoise-0.2/src/denoise.h
+/* Copyright (c) 2017 Mozilla */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#include "rnnoise.h"
+#include "kiss_fft.h"
+#include "nnet.h"
+
+#define FRAME_SIZE 480
+#define WINDOW_SIZE (2*FRAME_SIZE)
+#define FREQ_SIZE (FRAME_SIZE + 1)
+#define NB_BANDS 32
+#define NB_FEATURES (2*NB_BANDS+1)
+
+
+#define PITCH_MIN_PERIOD 60
+#define PITCH_MAX_PERIOD 768
+#define PITCH_FRAME_SIZE 960
+#define PITCH_BUF_SIZE (PITCH_MAX_PERIOD+PITCH_FRAME_SIZE)
+
+extern const WeightArray rnnoise_arrays[];
+
+extern const int eband20ms[];
+
+
+void rnn_biquad(float *y, float mem[2], const float *x, const float *b, const float *a, int N);
+
+void rnn_pitch_filter(kiss_fft_cpx *X, const kiss_fft_cpx *P, const float *Ex, const float *Ep,
+                  const float *Exp, const float *g);
+
+void rnn_frame_analysis(DenoiseState *st, kiss_fft_cpx *X, float *Ex, const float *in);
+
+int rnn_compute_frame_features(DenoiseState *st, kiss_fft_cpx *X, kiss_fft_cpx *P,
+                                  float *Ex, float *Ep, float *Exp, float *features, const float *in);
+Source: build/rnnoise-0.2/src/kiss_fft.h
+/*Copyright (c) 2003-2004, Mark Borgerding
+  Lots of modifications by Jean-Marc Valin
+  Copyright (c) 2005-2007, Xiph.Org Foundation
+  Copyright (c) 2008,      Xiph.Org Foundation, CSIRO
+
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice,
+       this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice,
+       this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE.*/
+
+#ifndef KISS_FFT_H
+#define KISS_FFT_H
+
+#include <stdlib.h>
+#include <math.h>
+#include "arch.h"
+
+#include <stdlib.h>
+#define opus_alloc(x) malloc(x)
+#define opus_free(x) free(x)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef USE_SIMD
+# include <xmmintrin.h>
+# define kiss_fft_scalar __m128
+#define KISS_FFT_MALLOC(nbytes) memalign(16,nbytes)
+#else
+#define KISS_FFT_MALLOC opus_alloc
+#endif
+
+#ifdef FIXED_POINT
+#include "arch.h"
+
+#  define kiss_fft_scalar opus_int32
+#  define kiss_twiddle_scalar opus_int16
+
+
+#else
+# ifndef kiss_fft_scalar
+/*  default is float */
+#   define kiss_fft_scalar float
+#   define kiss_twiddle_scalar float
+#   define KF_SUFFIX _celt_single
+# endif
+#endif
+
+typedef struct {
+    kiss_fft_scalar r;
+    kiss_fft_scalar i;
+}kiss_fft_cpx;
+
+typedef struct {
+   kiss_twiddle_scalar r;
+   kiss_twiddle_scalar i;
+}kiss_twiddle_cpx;
+
+#define MAXFACTORS 8
+/* e.g. an fft of length 128 has 4 factors
+ as far as kissfft is concerned
+Source: build/rnnoise-0.2/src/nnet.h
+/* Copyright (c) 2018 Mozilla
+   Copyright (c) 2017 Jean-Marc Valin */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifndef NNET_H_
+#define NNET_H_
+
+#include <stddef.h>
+#include "opus_types.h"
+
+#define ACTIVATION_LINEAR  0
+#define ACTIVATION_SIGMOID 1
+#define ACTIVATION_TANH    2
+#define ACTIVATION_RELU    3
+#define ACTIVATION_SOFTMAX 4
+#define ACTIVATION_SWISH   5
+
+#define WEIGHT_BLOB_VERSION 0
+#define WEIGHT_BLOCK_SIZE 64
+typedef struct {
+  const char *name;
+  int type;
+  int size;
+  const void *data;
+} WeightArray;
+
+#define WEIGHT_TYPE_float 0
+#define WEIGHT_TYPE_int 1
+#define WEIGHT_TYPE_qweight 2
+#define WEIGHT_TYPE_int8 3
+
+typedef struct {
+  char head[4];
+  int version;
+  int type;
+  int size;
+  int block_size;
+  char name[44];
+} WeightHead;
+
+/* Generic sparse affine transformation. */
+typedef struct {
+  const float *bias;
+  const float *subias;
+  const opus_int8 *weights;
+  const float *float_weights;
+  const int *weights_idx;
+  const float *diag;
+  const float *scale;
+  int nb_inputs;
+  int nb_outputs;
+} LinearLayer;
+
+/* Generic sparse affine transformation. */
+typedef struct {
+  const float *bias;
+  const float *float_weights;
+Source: build/rnnoise-0.2/src/nnet_arch.h
+/* Copyright (c) 2018-2019 Mozilla
+                 2023 Amazon */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifndef NNET_ARCH_H
+#define NNET_ARCH_H
+
+#include "nnet.h"
+#include "arch.h"
+#include "common.h"
+#include "vec.h"
+
+#define CAT_SUFFIX2(a,b) a ## b
+#define CAT_SUFFIX(a,b) CAT_SUFFIX2(a, b)
+
+#define RTCD_SUF(name) CAT_SUFFIX(name, RTCD_ARCH)
+
+# if !defined(OPUS_GNUC_PREREQ)
+#  if defined(__GNUC__)&&defined(__GNUC_MINOR__)
+#   define OPUS_GNUC_PREREQ(_maj,_min) \
+ ((__GNUC__<<16)+__GNUC_MINOR__>=((_maj)<<16)+(_min))
+#  else
+#   define OPUS_GNUC_PREREQ(_maj,_min) 0
+#  endif
+# endif
+
+
+/* Force vectorization on for DNN code because some of the loops rely on
+   compiler vectorization rather than explicitly using intrinsics. */
+#if OPUS_GNUC_PREREQ(5,1)
+#define GCC_POP_OPTIONS
+#pragma GCC push_options
+#pragma GCC optimize("tree-vectorize")
+#endif
+
+
+#define MAX_ACTIVATIONS (4096)
+
+static OPUS_INLINE void vec_swish(float *y, const float *x, int N)
+{
+   int i;
+   float tmp[MAX_ACTIVATIONS];
+   celt_assert(N <= MAX_ACTIVATIONS);
+   vec_sigmoid(tmp, x, N);
+   for (i=0;i<N;i++)
+      y[i] = x[i]*tmp[i];
+}
+
+static OPUS_INLINE float relu(float x)
+{
+   return x < 0 ? 0 : x;
+}
+
+/*#define HIGH_ACCURACY */
+
+void RTCD_SUF(compute_activation_)(float *output, const float *input, int N, int activation)
+{
+Source: build/rnnoise-0.2/src/opus_types.h
+/* (C) COPYRIGHT 1994-2002 Xiph.Org Foundation */
+/* Modified by Jean-Marc Valin */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+   OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+/* opus_types.h based on ogg_types.h from libogg */
+
+/**
+   @file opus_types.h
+   @brief Opus reference implementation types
+*/
+#ifndef OPUS_TYPES_H
+#define OPUS_TYPES_H
+
+/* Use the real stdint.h if it's there (taken from Paul Hsieh's pstdint.h) */
+#if (defined(__STDC__) && __STDC__ && defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || (defined(__GNUC__) && (defined(_STDINT_H) || defined(_STDINT_H_)) || defined (HAVE_STDINT_H))
+#include <stdint.h>
+
+   typedef int16_t opus_int16;
+   typedef uint16_t opus_uint16;
+   typedef int32_t opus_int32;
+   typedef uint32_t opus_uint32;
+#elif defined(_WIN32)
+
+#  if defined(__CYGWIN__)
+#    include <_G_config.h>
+     typedef _G_int32_t opus_int32;
+     typedef _G_uint32_t opus_uint32;
+     typedef _G_int16 opus_int16;
+     typedef _G_uint16 opus_uint16;
+#  elif defined(__MINGW32__)
+     typedef short opus_int16;
+     typedef unsigned short opus_uint16;
+     typedef int opus_int32;
+     typedef unsigned int opus_uint32;
+#  elif defined(__MWERKS__)
+     typedef int opus_int32;
+     typedef unsigned int opus_uint32;
+     typedef short opus_int16;
+     typedef unsigned short opus_uint16;
+#  else
+     /* MSVC/Borland */
+     typedef __int32 opus_int32;
+     typedef unsigned __int32 opus_uint32;
+     typedef __int16 opus_int16;
+     typedef unsigned __int16 opus_uint16;
+#  endif
+
+#elif defined(__MACOS__)
+
+#  include <sys/types.h>
+   typedef SInt16 opus_int16;
+   typedef UInt16 opus_uint16;
+   typedef SInt32 opus_int32;
+   typedef UInt32 opus_uint32;
+
+#elif (defined(__APPLE__) && defined(__MACH__)) /* MacOS X Framework build */
+
+#  include <sys/types.h>
+Source: build/rnnoise-0.2/src/pitch.h
+/* Copyright (c) 2007-2008 CSIRO
+   Copyright (c) 2007-2009 Xiph.Org Foundation
+   Written by Jean-Marc Valin */
+/**
+   @file pitch.h
+   @brief Pitch analysis
+ */
+
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+   OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifndef PITCH_H
+#define PITCH_H
+
+#include "arch.h"
+
+void rnn_pitch_downsample(celt_sig *x[], opus_val16 *x_lp,
+      int len, int C);
+
+void rnn_pitch_search(const opus_val16 *x_lp, opus_val16 *y,
+                  int len, int max_pitch, int *pitch);
+
+opus_val16 rnn_remove_doubling(opus_val16 *x, int maxperiod, int minperiod,
+      int N, int *T0, int prev_period, opus_val16 prev_gain);
+
+
+/* OPT: This is the kernel you really want to optimize. It gets used a lot
+   by the prefilter and by the PLC. */
+static OPUS_INLINE void xcorr_kernel(const opus_val16 * x, const opus_val16 * y, opus_val32 sum[4], int len)
+{
+   int j;
+   opus_val16 y_0, y_1, y_2, y_3;
+   celt_assert(len>=3);
+   y_3=0; /* gcc doesn't realize that y_3 can't be used uninitialized */
+   y_0=*y++;
+   y_1=*y++;
+   y_2=*y++;
+   for (j=0;j<len-3;j+=4)
+   {
+      opus_val16 tmp;
+      tmp = *x++;
+      y_3=*y++;
+      sum[0] = MAC16_16(sum[0],tmp,y_0);
+      sum[1] = MAC16_16(sum[1],tmp,y_1);
+      sum[2] = MAC16_16(sum[2],tmp,y_2);
+      sum[3] = MAC16_16(sum[3],tmp,y_3);
+      tmp=*x++;
+      y_0=*y++;
+      sum[0] = MAC16_16(sum[0],tmp,y_1);
+      sum[1] = MAC16_16(sum[1],tmp,y_2);
+      sum[2] = MAC16_16(sum[2],tmp,y_3);
+      sum[3] = MAC16_16(sum[3],tmp,y_0);
+      tmp=*x++;
+      y_1=*y++;
+      sum[0] = MAC16_16(sum[0],tmp,y_2);
+      sum[1] = MAC16_16(sum[1],tmp,y_3);
+      sum[2] = MAC16_16(sum[2],tmp,y_0);
+      sum[3] = MAC16_16(sum[3],tmp,y_1);
+Source: build/rnnoise-0.2/src/rnn.h
+/* Copyright (c) 2017 Jean-Marc Valin */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifndef RNN_H_
+#define RNN_H_
+
+#include "rnnoise.h"
+#include "rnnoise_data.h"
+
+#include "opus_types.h"
+
+#define WEIGHTS_SCALE (1.f/256)
+
+#define MAX_NEURONS 1024
+
+
+typedef struct {
+  float conv1_state[CONV1_STATE_SIZE];
+  float conv2_state[CONV2_STATE_SIZE];
+  float gru1_state[GRU1_STATE_SIZE];
+  float gru2_state[GRU2_STATE_SIZE];
+  float gru3_state[GRU3_STATE_SIZE];
+} RNNState;
+void compute_rnn(const RNNoise *model, RNNState *rnn, float *gains, float *vad, const float *input, int arch);
+
+#endif /* RNN_H_ */
+Source: build/rnnoise-0.2/src/rnnoise_data.h
+
+#ifndef RNNOISE_DATA_H
+#define RNNOISE_DATA_H
+
+#include "nnet.h"
+
+
+#define CONV1_OUT_SIZE 128
+
+#define CONV1_IN_SIZE 65
+
+#define CONV1_STATE_SIZE (65 * (2))
+
+#define CONV1_DELAY 1
+
+#define CONV2_OUT_SIZE 384
+
+#define CONV2_IN_SIZE 128
+
+#define CONV2_STATE_SIZE (128 * (2))
+
+#define CONV2_DELAY 1
+
+#define GRU1_OUT_SIZE 384
+
+#define GRU1_STATE_SIZE 384
+
+#define GRU2_OUT_SIZE 384
+
+#define GRU2_STATE_SIZE 384
+
+#define GRU3_OUT_SIZE 384
+
+#define GRU3_STATE_SIZE 384
+
+#define DENSE_OUT_OUT_SIZE 32
+
+#define VAD_DENSE_OUT_SIZE 1
+
+typedef struct {
+    LinearLayer conv1;
+    LinearLayer conv2;
+    LinearLayer gru1_input;
+    LinearLayer gru1_recurrent;
+    LinearLayer gru2_input;
+    LinearLayer gru2_recurrent;
+    LinearLayer gru3_input;
+    LinearLayer gru3_recurrent;
+    LinearLayer dense_out;
+    LinearLayer vad_dense;
+} RNNoise;
+
+int init_rnnoise(RNNoise *model, const WeightArray *arrays);
+
+#endif /* RNNOISE_DATA_H */
+Source: build/rnnoise-0.2/src/vec.h
+/* Copyright (c) 2018 Mozilla
+                 2008-2011 Octasic Inc.
+                 2012-2017 Jean-Marc Valin */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifndef VEC_H
+#define VEC_H
+
+#include "opus_types.h"
+#include <math.h>
+#include "arch.h"
+#include "x86/x86_arch_macros.h"
+
+
+#if defined(__AVX__) || defined(__SSE2__)
+#include "vec_avx.h"
+#elif (defined(__ARM_NEON__) || defined(__ARM_NEON)) && !defined(DISABLE_NEON)
+#include "vec_neon.h"
+#else
+
+#include "os_support.h"
+
+#define MAX_INPUTS (2048)
+
+#define NO_OPTIMIZATIONS
+
+static inline void sgemv16x1(float *out, const float *weights, int rows, int cols, int col_stride, const float *x)
+{
+   int i, j;
+   OPUS_CLEAR(out, rows);
+   for (i=0;i<rows;i+=16)
+   {
+      for (j=0;j<cols;j++)
+      {
+         const float * restrict w;
+         float * restrict y;
+         float xj;
+         w = &weights[j*col_stride + i];
+         xj = x[j];
+         y = &out[i];
+         y[0] += w[0]*xj;
+         y[1] += w[1]*xj;
+         y[2] += w[2]*xj;
+         y[3] += w[3]*xj;
+         y[4] += w[4]*xj;
+         y[5] += w[5]*xj;
+         y[6] += w[6]*xj;
+         y[7] += w[7]*xj;
+         y[8] += w[8]*xj;
+         y[9] += w[9]*xj;
+         y[10] += w[10]*xj;
+         y[11] += w[11]*xj;
+         y[12] += w[12]*xj;
+         y[13] += w[13]*xj;
+         y[14] += w[14]*xj;
+         y[15] += w[15]*xj;
+      }
+Source: build/rnnoise-0.2/src/vec_avx.h
+/* Copyright (c) 2018 Mozilla
+                 2012-2017 Jean-Marc Valin */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+/*
+  AVX implementation of vector operations, compile with -mavx
+  AVX2/FMA implementation of vector operations, compile with -mavx2 -mfma
+*/
+
+#ifndef VEC_AVX_H
+#define VEC_AVX_H
+
+#include <immintrin.h>
+#include <math.h>
+/*#include "celt/x86/x86cpu.h"*/
+
+#define MAX_INPUTS (2048)
+
+#define USE_SU_BIAS
+
+#ifndef __SSE_4_1__
+static inline __m128 mm_floor_ps(__m128 x) {
+  __m128 half = _mm_set1_ps(0.5);
+  return _mm_cvtepi32_ps(_mm_cvtps_epi32(_mm_sub_ps(x, half)));
+}
+#undef _mm_floor_ps
+#define _mm_floor_ps(x) mm_floor_ps(x)
+#endif
+
+
+/* If we don't have AVX available, emulate what we need with SSE up to 4.1. */
+#ifndef __AVX__
+
+typedef struct {
+  __m128 lo;
+  __m128 hi;
+} mm256_emu;
+#define __m256 mm256_emu
+
+static inline mm256_emu mm256_loadu_ps(const float *src) {
+  mm256_emu ret;
+  ret.lo = _mm_loadu_ps(&src[0]);
+  ret.hi = _mm_loadu_ps(&src[4]);
+  return ret;
+}
+#define _mm256_loadu_ps(src) mm256_loadu_ps(src)
+
+
+static inline void mm256_storeu_ps(float *dst, mm256_emu src) {
+  _mm_storeu_ps(dst, src.lo);
+  _mm_storeu_ps(&dst[4], src.hi);
+}
+#define _mm256_storeu_ps(dst, src) mm256_storeu_ps(dst, src)
+
+
+static inline mm256_emu mm256_setzero_ps(void) {
+  mm256_emu ret;
+  ret.lo = _mm_setzero_ps();
+Source: build/rnnoise-0.2/src/vec_neon.h
+/* Copyright (c) 2018 David Rowe
+                 2018 Mozilla
+                 2008-2011 Octasic Inc.
+                 2012-2017 Jean-Marc Valin */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+/* NEON support for ARM machines */
+
+#ifndef VEC_NEON_H
+#define VEC_NEON_H
+
+#include <arm_neon.h>
+#include "os_support.h"
+
+#if defined(__arm__) && !defined(__aarch64__) && (__ARM_ARCH < 8 || !defined(__clang__))
+/* Emulate vcvtnq_s32_f32() for ARMv7 Neon. */
+static OPUS_INLINE int32x4_t vcvtnq_s32_f32(float32x4_t x) {
+  return vrshrq_n_s32(vcvtq_n_s32_f32(x, 8), 8);
+}
+
+static OPUS_INLINE int16x8_t vpaddq_s16(int16x8_t a, int16x8_t b) {
+  return vcombine_s16(vpadd_s16(vget_low_s16(a), vget_high_s16(a)), vpadd_s16(vget_low_s16(b), vget_high_s16(b)));
+}
+
+static OPUS_INLINE int16x8_t vmull_high_s8(int8x16_t a, int8x16_t b) {
+  return vmull_s8(vget_high_s8(a), vget_high_s8(b));
+}
+#endif
+
+#ifdef __ARM_FEATURE_FMA
+/* If we can, force the compiler to use an FMA instruction rather than break
+   vmlaq_f32() into fmul/fadd. */
+#define vmlaq_f32(a,b,c) vfmaq_f32(a,b,c)
+#endif
+
+#ifndef LPCNET_TEST
+static inline float32x4_t exp4_approx(float32x4_t x) {
+  int32x4_t i;
+  float32x4_t xf;
+
+  x = vmaxq_f32(vminq_f32(x, vdupq_n_f32(88.f)), vdupq_n_f32(-88.f));
+
+  /* express exp(x) as exp2(x/log(2)), add 127 for the exponent later */
+  x = vmlaq_f32(vdupq_n_f32(127.f), x, vdupq_n_f32(1.44269504f));
+
+  /* split into integer and fractional parts */
+  i = vcvtq_s32_f32(x);
+  xf = vcvtq_f32_s32(i);
+  x = vsubq_f32(x, xf);
+
+  float32x4_t K0 = vdupq_n_f32(0.99992522f);
+  float32x4_t K1 = vdupq_n_f32(0.69583354f);
+  float32x4_t K2 = vdupq_n_f32(0.22606716f);
+  float32x4_t K3 = vdupq_n_f32(0.078024523f);
+  float32x4_t Y = vmlaq_f32(K0, x, vmlaq_f32(K1, x, vmlaq_f32(K2, K3, x)));
+
+  /* compute 2^i */
+  float32x4_t exponent = vreinterpretq_f32_s32(vshlq_n_s32(i, 23));
+Source: build/rnnoise-0.2/include/rnnoise.h
+/* Copyright (c) 2018 Gregor Richards
+ * Copyright (c) 2017 Mozilla */
+/*
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions
+   are met:
+
+   - Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   - Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifndef RNNOISE_H
+#define RNNOISE_H 1
+
+#include <stdio.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef RNNOISE_EXPORT
+# if defined(WIN32)
+#  if defined(RNNOISE_BUILD) && defined(DLL_EXPORT)
+#   define RNNOISE_EXPORT __declspec(dllexport)
+#  else
+#   define RNNOISE_EXPORT
+#  endif
+# elif defined(__GNUC__) && defined(RNNOISE_BUILD)
+#  define RNNOISE_EXPORT __attribute__ ((visibility ("default")))
+# else
+#  define RNNOISE_EXPORT
+# endif
+#endif
+
+typedef struct DenoiseState DenoiseState;
+typedef struct RNNModel RNNModel;
+
+/**
+ * Return the size of DenoiseState
+ */
+RNNOISE_EXPORT int rnnoise_get_size();
+
+/**
+ * Return the number of samples processed by rnnoise_process_frame at a time
+ */
+RNNOISE_EXPORT int rnnoise_get_frame_size();
+
+/**
+ * Initializes a pre-allocated DenoiseState
+ *
+ * If model is NULL the default model is used.
+ *
+ * See: rnnoise_create() and rnnoise_model_from_file()
+ */
+RNNOISE_EXPORT int rnnoise_init(DenoiseState *st, RNNModel *model);
+
+/**
+ * Allocate and initialize a DenoiseState
+ *
+ * If model is NULL the default model is used.
+ *
+ * The returned pointer MUST be freed with rnnoise_destroy().
+ */
+RNNOISE_EXPORT DenoiseState *rnnoise_create(RNNModel *model);

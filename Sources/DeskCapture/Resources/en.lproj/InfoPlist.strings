@@ -1,0 +1,3 @@
+"NSCameraUsageDescription" = "Capture your selected camera or video device only when you enable picture-in-picture or device recording. Media is stored on your Mac.";
+"NSMicrophoneUsageDescription" = "Record your narration only when microphone recording is enabled. Audio is stored on your Mac.";
+"NSScreenCaptureUsageDescription" = "Capture your selected screen regions, windows and text. Captures and recognized text stay on your Mac.";

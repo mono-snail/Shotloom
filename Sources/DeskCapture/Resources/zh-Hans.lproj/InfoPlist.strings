@@ -1,0 +1,3 @@
+"NSCameraUsageDescription" = "仅当你启用画中画或设备录制时，捕获你选择的视频源并保存在本机。";
+"NSMicrophoneUsageDescription" = "仅当你开启麦克风录制时，用于录制解说声音；文件保存在本机。";
+"NSScreenCaptureUsageDescription" = "捕获你选择的屏幕区域、窗口和文字，截图与识别结果保存在本机。";

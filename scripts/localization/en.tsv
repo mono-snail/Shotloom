@@ -1,0 +1,2678 @@
+0	Arrow
+1	Line
+2	Rectangle
+3	Rounded Rectangle
+4	Ellipse
+5	Pen
+6	Opaque Redaction
+7	Highlight
+8	Text
+9	Step Number
+10	Mosaic
+11	Vector Icon
+12	Spotlight
+13	Magnifier
+14	Ruler
+15	Curved Arrow
+16	Repair Background
+17	Replace Original Text
+18	Image Overlay
+19	Simple
+20	Label
+21	Bubble
+22	Outline
+23	Code
+24	Solid
+25	Translucent
+26	Pixel
+27	Soft Blur
+28	Crystal
+29	Halftone
+30	Star
+31	Heart
+32	Checkmark
+33	Lightning
+34	Sparkle
+35	Alert
+36	Location
+37	Pointer
+38	Coral
+39	Orange
+40	Cyan
+41	Purple
+42	Yellow
+43	Green
+44	White
+45	Black
+46	The project exceeds 100 MB.
+47	The project cannot be read or its version is unsupported.
+48	The overlay image is invalid.
+49	The project's original image could not be encoded.
+50	The project exceeds 100 MB and was not saved.
+51	Wait for the current pixel operation to finish, or cancel it and try again.
+52	The repair area is outside the canvas. The project was not changed.
+53	Texture and sampling repairs are limited to 20 million pixels per operation. Select a smaller area.
+54	Each image overlay is limited to 20 million pixels.
+55	Pixel processing or image encoding failed. The image and undo history were not changed.
+56	The selection could not be extracted. The image was not changed.
+57	Wait for image processing to finish, or cancel it before exporting.
+58	Image composition failed. Nothing was exported.
+59	Finish or cancel the current pixel operation first.
+60	Replacement text is empty or exceeds 64 KB.
+61	The replacement is too long to fit the original line at a readable size. Shorten it or add a separate text annotation.
+62	Background repair failed. The original image and project were not changed.
+63	The aligned result would be outside the canvas. Annotations were not moved.
+64	The image or selection changed, or the window closed. The earlier layout was not applied.
+65	The image cannot be read or exceeds the 20-million-pixel overlay limit.
+66	The image changed or the window closed. The earlier overlay was not added.
+67	Unable to Add Image
+68	DeskCapture Before and After.gif
+69	The first frame contains the original image and the second contains your edits. Confirm that the original is safe to share.
+70	Comparison Export Failed
+71	The comparison images have different dimensions.
+72	The comparison GIF could not be created.
+73	GIF encoding failed.
+74	Replace Image Text
+75	Done
+76	Smooth
+77	Texture
+78	Replacement Font
+79	System Font
+80	Recognizing…
+81	Rebuilding the text background…
+82	Cancel
+83	Recognition confidence is low or language results differ. Compare with the original image.
+84	Candidates
+85	Replace
+86	No text was recognized.
+87	Align Left
+88	Center Horizontally
+89	Align Right
+90	Align Bottom
+91	Center Vertically
+92	Align Top
+93	Distribute Horizontally
+94	Distribute Vertically
+95	My Palette
+96	Add Current Color
+97	Save frequently used colors here for next time.
+98	Use color {0}
+99	Remove {0}
+100	Add
+101	Enter a six-digit HEX color, such as #58CFE3.
+102	Annotation Presets
+103	Name the current style
+104	Saved
+105	Save
+106	No Saved Styles
+107	{0} · {1} pt
+108	Remove Style
+109	The update configuration is invalid. No check or download was started.
+110	Finish recording before installing the update.
+111	Finish the current capture before installing the update.
+112	Wait for processing or saving to finish before installing the update.
+113	Save and close your edits before installing the update.
+114	This test session does not check for online updates.
+115	This version is not connected to an update service.
+116	Updates are verified after downloading. Your work is preserved before installation.
+117	The update service is unavailable. Try again later.
+118	The update is ready. {0}Then continue installation.
+119	DeskCapture Update
+120	OK
+121	The update check did not finish. The existing app was kept.
+122	App Updates
+123	Check for Updates in the App Store…
+124	Check for Updates Automatically
+125	Continue Installing Downloaded Update…
+126	Check for Updates…
+127	System
+128	Light
+129	Dark
+130	Clear
+131	Warm Paper
+132	Graphite
+133	Aurora
+134	Apply {0} style
+135	You can save up to 30 presets. Remove an unused preset first.
+136	The preset background path is invalid.
+137	The preset background cannot be read or exceeds the size limit.
+138	Image Styling
+139	Choose an image to style
+140	Choose Image…
+141	From Clipboard
+142	Recent Screenshots
+143	Loading history…
+144	No Screenshots
+145	Style {0}
+146	{0} screenshots
+147	Reading image…
+148	Choose Image to Style…
+149	Unable to Open Image
+150	Choose one image at a time.
+151	The clipboard does not contain an image. Copy an image or an image file and try again.
+152	This screenshot is no longer in history. Choose another screenshot.
+153	Choose a local image file no larger than 100 MB.
+154	The clipboard image exceeds 100 MB.
+155	The image cannot be read or exceeds 80 million pixels.
+156	The image could not be decoded.
+157	Invalid automatic camera settings. Analysis supports up to 60 minutes and 200 manual overrides.
+158	Manual camera override ranges cannot overlap.
+159	Automatic camera analysis exceeded its 180-second limit. Nothing was exported. Disable automation to keep manual layouts.
+160	This audio track cannot be used for silence analysis.
+161	The audio track could not be read.
+162	Audio analysis exceeded its 180-second limit. Nothing was exported.
+163	The audio data cannot be read. It was not classified as silence.
+164	The audio PCM format or block exceeds the processing limit.
+165	A PCM block could not be read. It was not classified as silence.
+166	The audio timing is invalid. It was not classified as silence.
+167	The audio contains non-finite samples. It was not classified as silence.
+168	Audio analysis did not finish.
+169	Automatic Picture-in-Picture
+170	Follow Face
+171	Zoom
+172	Hide During Silence
+173	Silence Threshold
+174	Delay
+175	 seconds
+176	Fade
+177	Visibility Rules
+178	Add Rule
+179	Start Time (seconds)
+180	Start
+181	End Time (seconds)
+182	End
+183	Visibility
+184	Automatic
+185	Show
+186	Hide
+187	Lock Crop Focus
+188	Horizontal Focus
+189	Vertical Focus
+190	Rule Actions
+191	Remove Rule
+192	Segment Layouts
+193	Add Segment
+194	Start Seconds
+195	End Seconds
+196	Layout
+197	Transition (seconds)
+198	Transition Seconds
+199	Horizontal Position
+200	Vertical Position
+201	Frame Size
+202	Segment Actions
+203	Remove Segment
+204	Correct this segment's time range, position or transition settings.
+205	Picture-in-Picture
+206	Full-Screen Camera
+207	Camera on Left
+208	Camera on Right
+209	Hide Camera
+210	Camera layouts support up to 200 segments. Time ranges, positions and transitions must be valid and inside the source video.
+211	Camera layout ranges cannot overlap. Adjust their start and end times.
+212	The image could not be composed for dragging.
+213	Image processing is still running. Finish or cancel it before dragging the image out.
+214	The display was disconnected. Select the capture area again.
+215	The scrolling capture area could not be cropped. Select it again.
+216	No capture display was found. Reconnect a display and try again.
+217	Merged cells or unassigned text were detected. Review the visible table before exporting.
+218	Table structure extraction requires macOS 26 or later. Standard text recognition is available on this system.
+219	No QR code or barcode was recognized.
+220	Searching…
+221	Search Did Not Finish
+222	Showing {0} of {1} screenshots
+223	Found {0} screenshots
+224	Capture History
+225	View
+226	Gallery
+227	List
+228	Switch between gallery and list
+229	Organize
+230	Batch Organize Results…
+231	Select Images to Redact…
+232	Workflow…
+233	Recordings…
+234	Clear All History…
+235	Import
+236	Image…
+237	Edit Clipboard
+238	Project…
+239	Video…
+240	Search screenshots, text or tags
+241	Show 100 More
+242	Delete This Screenshot?
+243	Delete
+244	The image, text index and project will move to a recoverable batch. Restore them from batch organization. Exported files are kept.
+245	Clear All {0} History Items?
+246	Clear All
+247	This deletes every screenshot, text index and editable project in history, including items hidden by search. It cannot be undone. Exported files and recordings are kept.
+248	History Was Not Cleared
+249	Searching screenshots…
+250	Unable to Complete Search
+251	Clear Search
+252	History Has Not Loaded
+253	Reload
+254	No Screenshots Yet
+255	No Matching Screenshots
+256	Capture Region
+257	Import Image…
+258	Style Screenshot
+259	Copy
+260	{0} × {1} pixels
+261	Copy Screenshot
+262	Edit Screenshot
+263	Edit {0}
+264	Remove Favorite
+265	Favorite Screenshot
+266	More Screenshot Actions
+267	Save File…
+268	Style Image…
+269	Rotate, Resize and Collage…
+270	Crop and Clean Up…
+271	Copy Text
+272	Run Workflow…
+273	Tags, Favorites and Collections…
+274	Share…
+275	Export Editable Project…
+276	Show in Finder
+277	Delete…
+278	Capture Window
+279	Capture Current Screen
+280	Capture All Displays
+281	Extract Text
+282	Scrolling Region Capture
+283	Record Region
+284	Scrolling Window Capture
+285	Select an area for a precise capture
+286	Capture the window without distractions
+287	Capture only the display under the pointer
+288	Combine displays into one image in display order
+289	Select text to recognize locally
+290	Select content and stitch with automatic or manual scrolling
+291	System audio and microphone
+292	Select a window, scroll it automatically and stitch the capture
+293	Screenshot
+294	Free Size
+295	1:1 Square
+296	16:9 Landscape
+297	9:16 Portrait
+298	The history index exceeds 64 MB. It was not loaded or modified.
+299	The image could not be encoded. Capture it again.
+300	This history retention period is unsupported.
+301	The retention period could not be calculated. History and settings were not changed.
+302	A history transaction is in progress. This data was not overwritten.
+303	The history file path is invalid.
+304	Deletion did not finish. Some files remain in {0}.
+305	The history index was updated. Some files remain in {0}.
+306	A history path is invalid. Clearing was cancelled.
+307	Clearing did not finish. Some files remain in {0}. Do not delete that folder.
+308	The history index was cleared, but some files could not be deleted and remain in {0}.
+309	macOS denied screen capture. If DeskCapture is already enabled, turn its permission off and on, then restart the app as prompted.
+310	{0} · Annotate Capture
+311	There is no recordable window in the selection. Select one using window capture.
+312	Scrolling capture and recording must stay on one display. Standard screenshots can span displays.
+313	Selected Window
+314	Selected Region
+315	Use Window
+316	Use Region
+317	Start Window Capture
+318	Start Scrolling Capture
+319	Scroll Direction
+320	Choose the scroll direction before capturing
+321	Processing image…
+322	Adjust Selection
+323	Recording Settings
+324	Record This Window
+325	Record the Window in This Region
+326	Annotation Presets…
+327	Redo ⇧⌘Z
+328	Duplicate Selected Annotation ⌘D
+329	Bring to Front
+330	Send to Back
+331	Delete Selected Annotation
+332	Move Image Elements…
+333	Detecting elements; you can also select an area manually…
+334	Click an element or select content, then drag it to move
+335	No elements detected. Select an area manually to move it.
+336	Add Image Overlay…
+337	Export Before-and-After GIF…
+338	Scrolling Screenshot
+339	Horizontal Scrolling Screenshot
+340	Record This Region
+341	Styles, images and other capture modes
+342	Style
+343	Style Current Screenshot ⇧⌘B
+344	Style Current Screenshot
+345	Cancel Esc
+346	Start recording, or press Return or double-click the region
+347	Start scrolling capture
+348	Copy and finish, or double-click the region
+349	Select content in the original image, then drag it to move
+350	Copy HEX
+351	Copy RGB
+352	Save This Color
+353	Move the pointer to inspect colors; click to pick
+354	sRGB · Click to pick
+355	Copied
+356	Finish Picking Color
+357	Create or Manage Workflows…
+358	Workflow
+359	Run a saved workflow or configure your own
+360	Run workflow: {0}
+361	Color Picker P · Click to copy HEX · ⇧Tab to copy RGB
+362	Shape
+363	Undo ⌘Z
+364	Save PNG ⌘S
+365	Size and Aspect Ratio · {0}
+366	Size and Aspect Ratio
+367	Exact Size · Pixels
+368	Width
+369	Selection width in pixels
+370	Height
+371	Selection height in pixels
+372	Apply Size
+373	Review and Redact Sensitive Information…
+374	Replace Text in This Image…
+375	Extract Table as TSV
+376	Extract Table as TSV · Requires macOS 26
+377	On this system, copy text and review the table manually.
+378	Extract Code with Indentation
+379	Recognize QR Code / Barcode
+380	Text and Content Recognition
+381	Drag to resize freely
+382	Click Size
+383	Curve
+384	Style
+385	Font
+386	Font Size
+387	Strength
+388	Export covers this area with solid black pixels. The original stays in history.
+389	Repair
+390	Option-click a clean area to sample, then select the repair area
+391	Select an area to remove; texture mode looks for a matching background
+392	Overlay Opacity
+393	Drag the image to move it; drag a corner to resize
+394	Color
+395	Custom Color
+396	Saved Colors
+397	Thickness
+398	Start Recording
+399	Selected Window
+400	No scrollable page was selected. Select an area at least 40 × 40 inside a webpage or document.
+401	Scrolling capture follows one page. Keep the selection inside the visible page of “{0}”, then start.
+402	Adjusted to the visible area of “{0}”. Confirm the highlighted region before starting.
+403	Adjusted to
+404	Capture the highlighted region in “{0}”
+405	 · {0}:{1}
+406	Capturing window…
+407	Click a window · Return to start automatic scrolling capture · Esc to cancel
+408	Click a window · Return to start recording · Esc to cancel
+409	Select a region · Return to start recording · Esc to cancel
+410	Select webpage or document content · Confirm the highlighted region, then press Return · Esc to cancel
+411	Select text · Return to recognize and copy · Esc to cancel
+412	Click a window · Tab for color picker · Esc to cancel
+413	Drag to select · Release to annotate · Double-click to copy · Tab for color picker · Esc to cancel
+414	{0}  Tab to copy
+415	Copied {0}
+416	{0} · sRGB
+417	Drag to move the control bar
+418	Transparent
+419	Search text exceeded the 128 MB limit. Indexing did not finish.
+420	Screen capture did not respond in time. Confirm that permission is granted to this copy of DeskCapture, then restart the app.
+421	This clipboard content is unsupported. Edit text, images, PDFs or supported local files.
+422	The text exceeds 10 MB. Open it in a dedicated text editor.
+423	Edit
+424	Split
+425	Preview
+426	Markdown Preview
+427	Detect Automatically
+428	Detect the language automatically, or choose syntax highlighting manually
+429	Markdown: edit, split or reading preview
+430	Format
+431	Format JSON / XML (⇧⌥F)
+432	Find and Replace (⌘F)
+433	Copy All Text
+434	Save As… (⌘S)
+435	View options and export format
+436	Text Workspace
+437	Highlight Selected Text
+438	Remove Highlight
+439	Save PDF As…
+440	Auto · 
+441	Format {0} (⇧⌥F)
+442	Formatting supports JSON and XML
+443	Line {0}, Column {1}
+444	{0} lines   {1}
+445	Large Text Mode · Highlighting Paused
+446	 · Syntax Highlighting
+447	This text is large. Use the editor view. Markdown preview supports up to 500 KB.
+448	Formatting…
+449	The content changed. The formatting result was not applied.
+450	{0} is already formatted
+451	Format 
+452	{0} formatted · ⌘Z to undo
+453	Syntax Highlighting
+454	Wrap Lines
+455	Increase Text Size
+456	Decrease Text Size
+457	Reset Text Size
+458	Save As 
+459	A file is being saved. Wait before closing.
+460	Close and Discard Unsaved Changes?
+461	Cancel and use Save As to save your file first.
+462	Discard Changes
+463	All text copied
+464	Text copied.
+465	This file is already being saved.
+466	The PDF save source is no longer available.
+467	Saving…
+468	File Saved
+469	The selected version was saved; newer edits remain
+470	File saved.
+471	Save Failed
+472	Save failed: {0}
+473	Select text in the PDF first. Scanned pages need OCR.
+474	This PDF does not permit text extraction.
+475	The PDF text extraction source is no longer available.
+476	Extracting text…
+477	The PDF text extraction source cannot be read.
+478	The PDF has no extractable text and may be a scan.
+479	Image encoding failed.
+480	The PDF editor page is no longer available.
+481	Extracted text exceeds 20 MB. The output was not truncated.
+482	The PDF save source cannot be read.
+483	The PDF save page is no longer available.
+484	The PDF could not be exported.
+485	Choose a valid area inside the image.
+486	Color sampling failed.
+487	Color and Contrast
+488	Close
+489	Pick Color
+490	Color Role
+491	Foreground
+492	Background
+493	Foreground HEX
+494	Background HEX
+495	Contrast
+496	Sample Text Aa
+497	Normal Text AA
+498	Pass
+499	Fail
+500	Large Text AA
+501	Normal Text AAA
+502	Enter a six-digit HEX color
+503	Selection Color
+504	Average Color
+505	Set {0} to Average Color
+506	Use Text and Background Colors
+507	Copy Average Color as OKLCH
+508	Analyze Selection…
+509	Audio
+510	Video
+511	Presentation
+512	System Audio
+513	Microphone
+514	Frame Rate
+515	60 FPS is a target. The actual frame rate depends on the capture area and Mac performance and may be lower.
+516	Show Pointer
+517	Camera Picture-in-Picture
+518	Camera
+519	System Default
+520	Reading devices…
+521	The selected camera is unavailable
+522	Speaker Notes
+523	Edit Speaker Notes…
+524	Presentation Effects
+525	Record Clicks
+526	Smooth Pointer
+527	Keyboard Shortcut Badges
+528	Accessibility Permission
+529	Open Permissions…
+530	Edit
+531	Captions
+532	Segments and Speed
+533	Canvas and Presentation Effects
+534	Audio Processing
+535	Captions and Sentence Cuts
+536	Trim, arrange segments and adjust playback speed.
+537	Adjust the background, canvas, zoom and camera picture-in-picture.
+538	Adjust recorded audio, background music and fades.
+539	Transcribe or import captions. Excluded sentences are removed from the finished video.
+540	Processing…
+541	The project is invalid or changed while being read. Saving is disabled. Existing files are preserved; reopen the project.
+542	Video Editor
+543	Undo
+544	Redo
+545	Source Media
+546	Original
+547	Open Screen Recording Source
+548	Open Source
+549	Open Camera Source
+550	Copy Screen Recording Source
+551	Copy Source File
+552	Save Screen Recording Source As…
+553	Save Source As…
+554	Export Source as GIF…
+555	Project
+556	Open Project…
+557	Export Editable Project with Source Media…
+558	Export Delivery Package with Video, Captions and Source Project…
+559	Choose File…
+560	Choose Save Location…
+561	Saving edits…
+562	Unsaved Changes
+563	Recording saved; source copied
+564	Recording Saved
+565	Save Copy of Edits…
+566	Save Edits
+567	Export Finished Video…
+568	Original Comparison
+569	Finished Preview
+570	Updating preview…
+571	Compare with Original
+572	Preparing the full video and camera preview…
+573	Preview Unavailable
+574	There is no camera footage at this time. The camera recording may have ended early or been interrupted.
+575	Retry
+576	Pause
+577	Play
+578	Seeking
+579	Preparing playback
+580	Camera picture-in-picture; drag to reposition
+581	Drag to move the camera. Adjust its size and style in the inspector.
+582	Editing Tools
+583	Reset Range
+584	Save Current Frame
+585	Trim Range
+586	Start (seconds)
+587	Start
+588	Set to Current Position
+589	End (seconds)
+590	End
+591	Camera media is unavailable
+592	Show Camera
+593	Mirror
+594	Size
+595	Camera Media
+596	Replace Video…
+597	Import Video…
+598	Clicks and Shortcuts
+599	Click Highlight
+600	Show Shortcuts
+601	Recorded Audio
+602	Master Volume
+603	Mix Volume
+604	Source Volume
+605	Automatic Volume
+606	Noise Reduction
+607	Low-Frequency Noise Reduction
+608	Background Noise Suppression
+609	Suppression Strength
+610	This video has no recorded audio
+611	Speech Transcription
+612	Transcription Engine
+613	Local Transcription
+614	System Transcription
+615	Language
+616	Chinese
+617	Automatic
+618	日本語
+619	Model
+620	Model Management
+621	Manage Models…
+622	Start Transcription
+623	Cancel Transcription
+624	Show Captions
+625	Import Captions
+626	Import SRT…
+627	Export Captions
+628	Export SRT…
+629	The project could not be read. Editing settings were not applied.
+630	There is not enough video content to edit.
+631	{0}{1}
+632	 The previous preview is kept. New settings have not been applied.
+633	Importing picture-in-picture media…
+634	The media contains no video.
+635	The media dimensions are invalid. The original media was not replaced.
+636	The media could not be converted for picture-in-picture. The original was not replaced.
+637	Picture-in-picture media imported. Drag it in the preview to reposition.
+638	Import Cancelled
+639	Picture-in-picture import failed: {0}
+640	Preparing the model and transcription…
+641	No speech was recognized. You can import an SRT file.
+642	Transcription complete. Edit captions or uncheck sentences to cut them.
+643	Transcription Cancelled
+644	Transcription failed: {0}
+645	The caption file is too large.
+646	Captions Imported
+647	Edits Saved
+648	The project is not ready or is being saved. Reopen it and try again.
+649	Invalid trim range. Set start and end points within the source duration.
+650	Captions extend beyond the source video.
+651	Exporting captions…
+652	SRT saved with cuts reflected in its timeline
+653	Caption Export Cancelled
+654	Caption export failed: {0}
+655	DeskCapture-Delivery
+656	DeskCapture-Edit-Copy.deskvideo
+657	Includes source media and editable settings. Review the included media before sharing. Existing folders are not overwritten.
+658	Edit copy exported; the original project on disk was kept
+659	Project exported with source media
+660	Project Export Cancelled
+661	Project export failed: {0}
+662	The source file could not be copied. Try again or show it in Finder.
+663	Screen recording source file copied
+664	Source file copied
+665	Exported
+666	Export Cancelled
+667	Export failed: {0}
+668	DeskCapture Trimmed.mp4
+669	Trimmed Video Saved
+670	Trim Cancelled
+671	Trim failed: {0}
+672	DeskCapture Finished.mp4
+673	A zoom segment has an invalid time or focus. Correct it first.
+674	Finished Video Saved
+675	Export cancelled; the original video was kept
+676	Finished video export failed: {0}
+677	The video is not ready.
+678	DeskCapture Video Frame.png
+679	Video Frame Saved
+680	Frame export cancelled. The original video was kept.
+681	Frame export failed: {0}
+682	The trim range is invalid.
+683	The recording contains no video.
+684	The video trimming task could not be created.
+685	The recording has no usable video frames.
+686	My Style
+687	Replace Image…
+688	Replace Image from Clipboard
+689	Generating preview…
+690	Loading background…
+691	Updating preview…
+692	Style
+693	Canvas
+694	Aspect Ratio
+695	Padding
+696	Corner Radius
+697	Import Background Image…
+698	Restore Gradient Background
+699	Cancel Background Loading
+700	Watermark
+701	Add Tiled Watermark
+702	Enter text to enable the watermark
+703	My Presets
+704	Load Preset
+705	Preset Name
+706	Name
+707	Saving…
+708	Save Preset
+709	Remove Preset
+710	Preparing full-resolution image…
+711	Save Copy…
+712	Copy Image
+713	Choose a local background image no larger than 100 MB.
+714	The background image could not be read.
+715	The video has no exportable frames.
+716	The GIF file could not be created.
+717	GIF writing failed.
+718	Capture Previous Region Again
+719	Capture in {0} Seconds
+720	Timer and Repeat Region
+721	Hide the panel (Esc); reopen it from the menu bar
+722	Hide Panel
+723	History
+724	Settings
+725	Quit
+726	Current Display
+727	All Displays: combine screenshots in display order
+728	More Screen Capture Modes
+729	Record Window…
+730	Record iPhone / iPad or Device…
+731	Window and device recording
+732	More Recording Modes
+733	Choose a region, then select up, down, left or right scrolling
+734	Resume Recording
+735	Open Live Annotations
+736	Finish and Save
+737	Clear Annotations
+738	Continue Interacting
+739	Resume Annotating
+740	Annotating · Esc to interact with the screen
+741	Annotations are click-through; interact with the original app
+742	DeskCapture Screenshot Tiles
+743	Save full-resolution PNG tiles and their position manifest as a complete folder.
+744	DeskCapture Scrolling Capture {0}.{1}
+745	This capture is long and will be saved as a paginated PDF. Go back and choose PNG tiles for full-resolution images.
+746	Save as a long PNG or an automatically paginated PDF.
+747	The selection or display scale is invalid.
+748	Content Bounds and Size
+749	No reliable candidate was found here. Drag to select manually.
+750	Selection
+751	Snap to Bounds
+752	Pixel-to-Point Scale
+753	Selection Size
+754	Points
+755	Analyzing the current image…
+756	Mark Selection
+757	Redact Selection
+758	The current image cannot be rendered.
+759	The image changed. Close this panel and inspect it again.
+760	Not Set
+761	Another app is using this shortcut. Choose another combination in Settings.
+762	Copying did not finish. The scrolling capture was kept.
+763	The full scrolling capture was exported
+764	This combination is assigned to another capture mode.
+765	Another app is using this shortcut. The previous combination is still available.
+766	The shortcut for this mode was cleared.
+767	{0} shortcut saved.
+768	Shortcut set to {0}
+769	This shortcut is in use. The previous shortcut is still available.
+770	This key combination is in use. The previous shortcut is still available.
+771	The region capture shortcut was cleared.
+772	Recordings
+773	{0} Settings
+774	Finish the current capture, recording or dialog before choosing workflow input.
+775	The input picker could not open. The original image was kept.
+776	Close the current dialog before starting a screenshot.
+777	Only one display is connected. Use Current Display capture.
+778	Preparing Capture
+779	Capture in {0} seconds · Press the shortcut to cancel
+780	The display under the pointer was not found. Reconnect a display and try again.
+781	The previous selection's display or scale changed. Select the region again.
+782	Fewer than two displays are available for capture. Use Current Display capture.
+783	Combining display captures failed. Try Current Display capture.
+784	{0} saved
+785	Scrolling capture saved to file.
+786	Recognizing Content
+787	No Content Recognized
+788	Recognition Failed
+789	Capture completed, but saving to history failed: {0}
+790	Preparing to Record
+791	Live Scrolling Preview
+792	The image cannot be read or exceeds the 80-million-pixel limit.
+793	Finish the current screenshot first.
+794	Copy one file at a time for editing.
+795	The PDF cannot be read or exceeds 100 MB.
+796	The PDF could not be read.
+797	Clipboard.pdf
+798	Clipboard text exceeds 10 MB.
+799	Clipboard.txt
+800	The PDF is encrypted or has no pages. Unlock it first.
+801	This PDF does not permit annotations.
+802	PDF Text.txt
+803	Choose a local file. Folders are not supported.
+804	This file type is unsupported: {0}.
+805	The project image could not be rendered.
+806	Import failed: {0}
+807	A project is already opening. Cancel it from the progress window.
+808	Open Project Copy
+809	Preparing an editable project copy…
+810	Cancel Import
+811	This version does not support step-by-step tutorials. The original project was not changed.
+812	The project copy was imported, but no editor window was opened.
+813	Project Import Cancelled
+814	Project not opened: {0}
+815	Video Editor — {0}
+816	Unable to read image: {0}
+817	Copying image…
+818	Unable to Copy
+819	The clipboard has newer content. It was not overwritten.
+820	Unable to write to the clipboard. Copy again.
+821	Image copied and ready to paste.
+822	Copy failed: {0}
+823	An image is already being saved in this window.
+824	Saving image…
+825	{0} saved.
+826	No text was recognized. Try a clearer or larger region.
+827	Text recognition failed: {0}
+828	No copyable text was recognized.
+829	The clipboard has newer content. The result was kept in the preview.
+830	Unable to write to the clipboard.
+831	Text Copied
+832	There is no text to copy.
+833	Text copied. Recognition was performed on your Mac.
+834	Copied an HTML table with merged cells and a flat TSV. Paste behavior depends on the destination app.
+835	Table Copied
+836	Review Table Structure — {0}
+837	Opening image…
+838	The project could not be read. Opened the final image instead: {0}
+839	This image is being saved as a history copy. Please wait.
+840	An editable copy was added to history.
+841	Saving a copy failed: {0}
+842	Unable to open workflow: {0}
+843	Unable to Open Workflow
+844	This local workflow was not found. Save it before using its launch link.
+845	Workflow — {0}
+846	Unable to load workflow image: {0}
+847	Image Styling — {0}
+848	Image Transforms and Collage — {0}
+849	The current annotated image could not be generated.
+850	Opening Crop and Cleanup…
+851	Unable to open image: {0}
+852	DeskCapture Project.deskcap
+853	Project file saved.
+854	Project export failed: {0}
+855	Choose a .deskcap project
+856	Project imported into history and ready for editing.
+857	Project import failed: {0}
+858	All screenshot history was cleared.
+859	Moved to a recoverable batch. Restore it from history batch organization.
+860	Removal failed: {0}
+861	Pin to Screen
+862	Pinned images are locked and click-through. Choose Unlock All Pinned Images from the menu bar to interact with them.
+863	Pinned to screen. Drag to move; double-click to close.
+864	Pinned images unlocked.
+865	The selection is outside the original display or has an invalid size. Select it again.
+866	The display connection, arrangement, scale or rotation changed. Captured content was kept. Select a target again for a new capture.
+867	The original display was disconnected or changed. Select it again.
+868	Video source stopped: 
+869	. Preserving media.
+870	The video source stopped producing frames. Saving completed segments.
+871	The selected video or audio source disconnected. Preserving source media without switching devices automatically.
+872	The original video source is unavailable. Reconnect and refresh, or explicitly choose another source.
+873	No video source is available. Connect and trust a USB device, then refresh.
+874	Finish the current screenshot, scrolling capture or recording first.
+875	The selected device disconnected. Refresh the device list.
+876	The original video source disconnected during preparation. No other device was started.
+877	The device recording folder is no longer available.
+878	The recording reached 1,000 segments. Save it and start a new recording.
+879	The original video source disconnected. Save and select it again.
+880	The original video source disconnected during startup. Source media was kept.
+881	The selected audio source produced no audio track. The original video was kept. Check device audio output or choose another input.
+882	Device video export failed.
+883	Device segment did not finish: {0}. Source media was kept.
+884	The device recording has no completed segments.
+885	DeskCapture-Device-{0}.mp4
+886	Saving did not finish: {0}. Source media remains in the recordings folder.
+887	Device Recording
+888	Refreshing…
+889	Refresh Devices
+890	No Video Sources Found
+891	Select a video source to start recording
+892	Video Source
+893	Device
+894	No Devices
+895	Original Video Source Unavailable
+896	Audio Source
+897	Audio from Selected Device
+898	No Audio
+899	Original Audio Source Unavailable
+900	Finishing recording and saving…
+901	Preparing recording…
+902	Finish and Close
+903	Continue
+904	Finish and Save
+905	Text corrections saved.
+906	The submitted corrections were saved. Newer changes are not saved yet.
+907	Recognized Text
+908	Unsaved Corrections
+909	Hide Text Panel
+910	Recognize Again
+911	Recognition and Corrected Text
+912	Show Source Text Boxes
+913	No Text Recognized
+914	{0} lines to review
+915	Mark Emails and Phone Numbers
+916	No email or phone number was found.
+917	Marked {0} lines. Check the covered areas before saving.
+918	Save Corrections
+919	Needs Review
+920	Replacement Text
+921	Replacement text for line {0}
+922	Finished audio peak measurements are invalid.
+923	AAC true-peak remeasurement still exceeds the limit. The destination was not replaced.
+924	Finished audio remeasurement did not finish.
+925	The finished audio peak correction task could not be created.
+926	The peak-corrected video could not be packaged.
+927	The peak-corrected audio track is empty.
+928	The peak-corrected audio track could not be committed.
+929	Finished audio measurement supports up to 60 minutes.
+930	The finished video has no measurable audio track.
+931	The finished floating-point audio mix could not be read.
+932	Floating-point mix reading did not start.
+933	An audio mix snapshot could not be created.
+934	The finished floating-point mix format is invalid.
+935	The mix sample size or timing is invalid.
+936	Copying an audio mix sample failed.
+937	Floating-point mix reading did not finish.
+938	The subject mask dimensions or plane format are unsupported.
+939	The subject mask pixel format is unsupported. Keep the original image and refine it manually.
+940	The subject mask could not be read.
+941	The subject mask data is incomplete.
+942	The subject mask contains invalid alpha values. Recognize the subject again.
+943	Subject analysis supports up to 20 million pixels.
+944	No distinct subject was found. Refine it manually with the brush.
+945	The selected subject is not in this image. Recognize it again.
+946	A video segment track could not be created.
+947	An audio segment track could not be created.
+948	Segment writing could not start.
+949	Writing a recording segment sample failed.
+950	Extending the last still frame failed.
+951	Recording has already ended.
+952	No complete screen frame arrived within 10 seconds. Recording did not continue.
+953	The recording produced no usable video frame. Original segments were kept.
+954	The segment file could not be finalized. Written content was kept.
+955	Finalizing the segment exceeded 15 seconds. Files and recovery data were kept.
+956	Batch Organization and Recovery
+957	Scope
+958	Current Search Results · {0} Items
+959	Show 100 More
+960	Include editable projects with original images in export
+961	Batch Classification
+962	Add Tags
+963	Comma-separated
+964	Remove Tags
+965	Add to Collection
+966	Keep Unchanged
+967	Favorite
+968	Mark as Favorite
+969	Apply to Selected Media
+970	Recover Removed Batches
+971	Refresh Batches
+972	No Recoverable Batches
+973	{0} items · {1}
+974	Recover
+975	Images, projects and history index restored with their original classifications.
+976	Cancel Task
+977	Remove Selected (Recoverable)
+978	Export Selected…
+979	Remove {0} Selected Screenshots?
+980	Move to Recoverable Batch
+981	Removed {0} items. You can recover them in this window.
+982	Only selected items are removed. Images, text indexes and projects commit or roll back together. Other captures and exports are kept.
+983	Task cancelled. Committed batches are available in history or recovery.
+984	Each tag entry is limited to 4 KB.
+985	Updated classification for {0} items.
+986	DeskCapture-Batch-{0}
+987	Complete batch exported: {0}
+988	The thumbnail dimensions are out of range.
+989	The thumbnail source is invalid or exceeds 128 MB.
+990	The thumbnail could not be read.
+991	Thumbnail unavailable; the original file was not changed
+992	The history index exceeds 64 MB. It was not changed.
+993	The history index has duplicate identifiers or too many items.
+994	History entries share a file. No media was changed.
+995	The history file type is invalid.
+996	The history file path is invalid. It was not changed.
+997	The transaction path is invalid. Recovery files were kept.
+998	Transaction paths do not accept symbolic links. Original files were kept.
+999	The history transaction lock could not be opened.
+1000	Another process is updating history. This data was not changed.
+1001	The recovery folder scope is invalid. Nothing was cleaned up.
+1002	The recovery log exceeds 64 MB. Original files were kept.
+1003	The recovery log is out of scope. Original files were kept.
+1004	Recovery found a file conflict or missing file. The log and recovery folder were kept.
+1005	Another version changed history during the transaction. The recovery log and all files were kept; the index was not overwritten.
+1006	The new history index exceeds 64 MB.
+1007	A batch file is missing or the destination exists. No file was moved.
+1008	The batch recovery log exceeds 64 MB. No file was moved.
+1009	A batch file is missing or the destination exists. Nothing was overwritten.
+1010	Another operation changed history. The index was not overwritten.
+1011	The transaction did not finish. Its log and files were kept: {0}
+1012	The new screenshot transaction identifier is invalid.
+1013	The text would make the saved index exceed 64 MB.
+1014	A history cleanup target is not a regular file. The index was not changed.
+1015	The history index was updated. Cleanup logs and staged files were kept; cleanup will be retried on the next history operation.
+1016	A batch must include 1–1,000 items still in history.
+1017	Multiple entries refer to the same file. Nothing was removed.
+1018	The recovery batch exceeds 64 MB. Files were kept.
+1019	The recovery batch format is invalid. Files were kept.
+1020	The recovery batch exceeds 64 MB.
+1021	The recovery batch format is invalid.
+1022	An item with this identifier already exists in history. It was not overwritten.
+1023	Deep Sea
+1024	Sunset
+1025	Iris
+1026	Mint
+1027	Rose
+1028	Cobalt
+1029	Dunes
+1030	Glacier
+1031	Forest
+1032	Original
+1033	The image dimensions or background padding are invalid.
+1034	The styled canvas exceeds 80 million pixels. Reduce padding or choose another aspect ratio.
+1035	Background padding or corner radius is invalid.
+1036	The preview dimensions are invalid.
+1037	The image is too large to create a styled background.
+1038	The styled image could not be generated.
+1039	Horizontal Strip (Reduce Height)
+1040	Vertical Strip (Reduce Width)
+1041	The removal range must be inside the original image, with the end after the start.
+1042	Keep at least one row and one column of pixels.
+1043	You can remove up to 100 strips at once.
+1044	The strip-removal image could not be allocated. Reduce the image dimensions.
+1045	The strip removal area could not be read.
+1046	Joining the remaining image failed.
+1047	Padding tolerance must be between 0 and 64.
+1048	The image edges could not be read.
+1049	The corner backgrounds differ. Remove strips or the background manually first.
+1050	No content to keep was found.
+1051	Trimming padding failed.
+1052	Background removal supports up to 20 million pixels. Resize the image first.
+1053	No distinct subject was recognized. Use manual strip removal.
+1054	Background removal did not produce a full-size image.
+1055	The crop must stay inside the image and retain at least one pixel.
+1056	The image exceeds the 60,000-pixel edge or 80-million-pixel processing limit.
+1057	Crop and Cleanup
+1058	Selection Tools
+1059	Fit
+1060	Fit to Window
+1061	Fit Width
+1062	Preview Zoom
+1063	Image Tools
+1064	Repair and Cutout…
+1065	Simplify Interface…
+1066	Smart Composition…
+1067	Color and Contrast…
+1068	Generating result…
+1069	No Result Yet
+1070	Original
+1071	Result
+1072	Left
+1073	Top
+1074	Keep Full Image
+1075	Remove Strip
+1076	Direction
+1077	Start Pixel
+1078	Strip start pixel
+1079	End Pixel
+1080	Strip end pixel (exclusive)
+1081	Add Strip
+1082	{0} {1}–{2} px
+1083	Horizontal Strip
+1084	Vertical Strip
+1085	Remove Strip
+1086	Remove Background
+1087	Trim Edge Padding
+1088	Background Tolerance {0}
+1089	Restore Original
+1090	Opening…
+1091	Finish and Edit
+1092	The crop must stay inside the image and be at least 1 px wide and high.
+1093	Unable to open editor: {0} The processed result was kept.
+1094	Enter a range from 0 to {0}, with the end after the start.
+1095	Crop and Cleanup — DeskCapture
+1096	No distinct subject was recognized. Keep the original and refine it manually.
+1097	Slider Comparison
+1098	Transparent Overlay
+1099	Pixel Difference
+1100	Side by Side
+1101	Alignment, scale or difference settings are invalid.
+1102	Comparison settings exceed 16 KB.
+1103	The comparison settings or measurements are invalid.
+1104	The comparison canvas supports 10 million pixels and a 16,000-pixel edge. Resize images first.
+1105	The comparison canvas could not be allocated.
+1106	The comparison pixels cannot be read.
+1107	The difference image could not be generated.
+1108	Comparison output failed.
+1109	Image Comparison
+1110	Load Image…
+1111	Settings File
+1112	Load Settings…
+1113	Export Settings and Measurements…
+1114	Calculating comparison…
+1115	Preparing images…
+1116	Comparison Mode
+1117	Mode
+1118	Original Image Ratio
+1119	Image Alignment
+1120	Overlay Scale
+1121	Horizontal Offset (px)
+1122	Vertical Offset (px)
+1123	Reset Alignment
+1124	Difference Areas
+1125	Detection Threshold {0}
+1126	Show Area Borders
+1127	Changed Pixels
+1128	{0} · {1} × {2} px
+1129	The image does not match the loaded record
+1130	View
+1131	View Zoom
+1132	Export Comparison Image…
+1133	Image Comparison Settings.json
+1134	Image Comparison.png
+1135	Slider, overlay and side-by-side modes include the project's original image. Confirm it is safe to share.
+1136	Crop
+1137	Remove Strips
+1138	Original image; drag to select a {0} area
+1139	Processed Result
+1140	Image Copied
+1141	Cancelled
+1142	Cancelling…
+1143	Saving an editable history copy. Please wait.
+1144	Keep Editable Image Changes?
+1145	Save a history copy to continue editing annotations. Exported image files are unaffected.
+1146	Save History Copy
+1147	Do Not Keep
+1148	Saving editable history copy…
+1149	History copy was not saved: {0}
+1150	The image is invalid or exceeds the capacity limit.
+1151	The image cannot be read or exceeds the file size limit.
+1152	Output dimensions are invalid or exceed the image capacity limit.
+1153	Image transformation failed.
+1154	A collage can contain 1–30 images.
+1155	Collage dimensions or spacing exceed the capacity limit.
+1156	The collage exceeds the capacity limit. Use fewer images or resize them first.
+1157	Transforms and Collage
+1158	Rotate 90°
+1159	Flip Horizontally
+1160	Flip Vertically
+1161	Size
+1162	Width (px)
+1163	Height (px)
+1164	Lock Aspect Ratio
+1165	Restore Original Size
+1166	Collage
+1167	Add Images…
+1168	Vertical
+1169	Horizontal
+1170	Spacing {0} px
+1171	Clear Collage
+1172	Enter valid image dimensions.
+1173	A collage can contain up to 30 images.
+1174	The watermark settings are invalid.
+1175	Enter watermark text and check its font size, angle and opacity.
+1176	The watermark canvas could not be created.
+1177	The watermark could not be generated.
+1178	Enter watermark text
+1179	Angle
+1180	Opacity
+1181	{0} items total
+1182	Searching
+1183	Search Media
+1184	Search media ⌘F; Esc to clear. Supports phrases, tags and exclusions.
+1185	Dismiss Notice
+1186	Select First 1,000 Items
+1187	Select All in Scope
+1188	Clear Selection
+1189	Selected {0} of {1}
+1190	Tiny · 78 MB
+1191	Base · 148 MB
+1192	Small · 488 MB
+1193	The model format or size does not match the selected tier.
+1194	Model SHA-256 verification failed. The model was not installed.
+1195	This model is transcribing. Manage it after transcription finishes.
+1196	This model is in use or downloading.
+1197	The model download failed. The existing model was kept.
+1198	A local transcription is already running. Finish or cancel it before starting another.
+1199	Local Caption Models
+1200	Reading…
+1201	…
+1202	Installed
+1203	Not Installed
+1204	Download
+1205	Manage
+1206	Import Model…
+1207	Download Again
+1208	Delete Model
+1209	Local Engine Unavailable
+1210	Model Sources and Licenses
+1211	Cancel Processing
+1212	{0} · {1} complete
+1213	{0} cancelled.
+1214	The local caption engine was not installed correctly, or the language setting is invalid.
+1215	Local transcription supports videos with audio up to 60 minutes long.
+1216	The audio track could not be prepared for local transcription.
+1217	The caption result exceeds the processing limit. Existing captions were not replaced.
+1218	The caption result is invalid.
+1219	Caption segments exceed the processing limit.
+1220	The model produced invalid caption timing or text. Existing captions were not replaced.
+1221	Audio could not be converted for local transcription.
+1222	Audio track conversion did not finish.
+1223	Local Caption Engine
+1224	{0} timed out or its log exceeded the limit. No output was committed.
+1225	{0} did not finish. The original video and existing files were kept.
+1226	Scrolling Capture
+1227	Screen Recording
+1228	OCR Capture
+1229	Save File
+1230	Pinned Image
+1231	Recognize Text
+1232	Sensitive Information Redaction
+1233	Original Text Replacement
+1234	Add Annotation
+1235	The workflow could not be saved. The destination was kept.
+1236	Trim Padding
+1237	Limit Long Edge
+1238	Rotate Clockwise
+1239	Flip
+1240	Human Review of Sensitive Information
+1241	Screenshot Workflow
+1242	Use a supported workflow version with a 1–40-character name and 1–12 steps.
+1243	Only one sensitive information review step is allowed.
+1244	Choose a valid workflow icon.
+1245	The step settings do not match the tool.
+1246	Trim tolerance must be between 0 and 64.
+1247	The long-edge limit must be 16–8,000 pixels.
+1248	Rotation must be 1–3 quarter turns.
+1249	Choose horizontal or vertical flipping.
+1250	Configure a watermark.
+1251	Text recognition must be the last step so the text matches the final image.
+1252	Sensitive information review must follow all image processing. Only OCR of the redacted image can follow review.
+1253	The styling settings are invalid.
+1254	Two sets of styling settings cannot be used together.
+1255	Configure styling settings or choose a saved preset.
+1256	Sensitive information requires visible human review. No deliverable result was generated.
+1257	Workflow input is limited to 32 million pixels.
+1258	The human review interface was closed.
+1259	Step output exceeds 32 million pixels. Nothing was delivered.
+1260	Configure styling settings.
+1261	Run the workflow before using this tool.
+1262	You can save up to 50 workflows.
+1263	The workflow library exceeds 64 MB.
+1264	The workflow identifier does not match its file.
+1265	The workflow file exceeds 24 MB.
+1266	Saving would make the workflow library exceed 64 MB.
+1267	Choose an image or capture the current display, then run the workflow.
+1268	Workflow paused: review the candidates and image, then confirm to continue.
+1269	Processing stopped. The original image was kept.
+1270	The steps changed. Run the workflow again.
+1271	Image loaded.
+1272	No display is currently available for capture.
+1273	The display changed. Capture again.
+1274	Current display captured; ready to process.
+1275	Input selected.
+1276	Input selection cancelled. The original image was kept.
+1277	Select a window and confirm it as input.
+1278	Select a region and confirm it as input.
+1279	Choose an image or capture a display first.
+1280	{0} steps completed.
+1281	Step {0}: {1}
+1282	No Saved Workflows
+1283	New
+1284	Blank Workflow
+1285	Watermark → Style → Save
+1286	Resize → Copy
+1287	Resize Screenshot
+1288	Recognize → Copy Text
+1289	Save Workflow
+1290	More
+1291	Save as New Workflow
+1292	 Copy
+1293	Import Workflow…
+1294	Export Workflow…
+1295	Edit Sensitive Information Rules…
+1296	Copy Workflow Link
+1297	Save Image…
+1298	Save Text…
+1299	Add to History
+1300	Delete Current Workflow
+1301	Cancel Preview
+1302	Preview Updated
+1303	Preview Paused
+1304	Try Workflow
+1305	Run Workflow
+1306	Save Changes to the Current Workflow?
+1307	Save and Switch
+1308	Discard Changes
+1309	Save Workflow Changes?
+1310	Save and Close
+1311	Close Without Saving
+1312	Delete “{0}”?
+1313	Delete Workflow
+1314	Sample Preview
+1315	Compare with Original
+1316	Loading sample image…
+1317	Reload Sample Image
+1318	Text Result
+1319	Preview not updated: {0}
+1320	Icon
+1321	Add to Capture Toolbar
+1322	Processing Steps
+1323	Add Tool
+1324	No Tools Added
+1325	Output
+1326	Saved to Capture Toolbar
+1327	Workflow Saved
+1328	My Workflow
+1329	Publish Screenshot
+1330	Select 1–1,000 items and a new output folder that does not exist yet.
+1331	The media file type is invalid.
+1332	The media path is invalid.
+1333	Media is missing or is not a regular file.
+1334	A batch export is limited to 4 GB.
+1335	Export filename extensions conflict.
+1336	Titles support 120 characters, up to 20 unique tags of 1–32 characters, and up to 20 collections.
+1337	The media classification index is invalid or too large. The original index was kept.
+1338	A media identifier or collection reference is invalid. The original index was kept.
+1339	A classification field has an invalid format. The original index was kept.
+1340	The classification index lock could not be opened.
+1341	Another process is updating the classification index. Try again later.
+1342	The classification index exceeds 16 MB. The original file was kept.
+1343	The classification index exceeds 16 MB and was not saved.
+1344	Select 1–1,000 items for classification.
+1345	The collection was removed.
+1346	Some classifications changed during the batch. Nothing was modified. Refresh and try again.
+1347	Another operation changed classification. Reopen it before editing.
+1348	The media identifier is invalid.
+1349	The collection no longer exists.
+1350	Organize Media
+1351	Title
+1352	Leave blank to keep the original name
+1353	Collections
+1354	No Collections
+1355	Rename…
+1356	Remove Collection
+1357	Collection Actions
+1358	Actions for {0}
+1359	New Collection
+1360	Collection Name
+1361	Create
+1362	Rename Collection
+1363	New Name
+1364	Save Name
+1365	Save Classification
+1366	Tag input is limited to 4 KB.
+1367	Search is limited to 2,048 characters.
+1368	Close the quotation marks. Search supports up to 32 conditions.
+1369	is: currently supports only favorite.
+1370	type: supports image or video.
+1371	Search conditions cannot be empty.
+1372	The caption index exceeds 2 MB. This search did not finish.
+1373	Correct one line of text, up to 128 characters, before fitting fonts.
+1374	The background or text bounds do not support automatic fitting. Choose a font and size manually.
+1375	No suitable font candidate was found among installed fonts.
+1376	Font Candidates
+1377	Comparing installed fonts…
+1378	Use
+1379	The content changed. Fit the font again.
+1380	Size %.1f px · Tracking %+.2f px · Glyph Difference %.1f%%
+1381	Baseline and Weight
+1382	Baseline %.1f px · Weight %.2f
+1383	Compared {0} fonts out of {1} installed. Applies only to the next replacement of this line.
+1384	Restore Manual Font
+1385	Fit Again
+1386	Selected {0}; click for candidates or restore the manual font
+1387	Compare font, size and tracking candidates
+1388	Capture 2026
+1389	Price: 128.50
+1390	Local processing
+1391	The table is empty or exceeds 16,384 cells. Recognize smaller regions.
+1392	The table's row and column bounds are unreliable. Select a smaller region for review.
+1393	The table is too large. Recognize smaller regions.
+1394	Table cell ranges overlap. Review them against the original.
+1395	No table was recognized. Select only a complete table and try again.
+1396	Table review text exceeds the limit. Select a smaller region.
+1397	<!doctype html><html lang="en"><meta charset="utf-8"><title>Reviewed Table</title><table border="1" style="border-collapse:collapse">
+1398	Table output exceeds 32 MB. Nothing was delivered.
+1399	The table save could not be committed. The destination was kept.
+1400	Choose an HTML, JSON or TSV extension.
+1401	Table saved.
+1402	Review Table Structure
+1403	Cells
+1404	{0} unassigned lines; resolve each before exporting
+1405	Resolve
+1406	Use as Merged Top Row
+1407	Use as Merged Bottom Row
+1408	Ignore This Line
+1409	Row {0}, Column {1} · {2}×{3}
+1410	Show 100 More Cells
+1411	Row
+1412	Column
+1413	Row Span
+1414	Column Span
+1415	Cell Text
+1416	Delete Cell
+1417	Add Empty Cell
+1418	Copy Table
+1419	Merged Table
+1420	Flat TSV
+1421	Save…
+1422	Table.html
+1423	Choose another save location. The source will not be overwritten.
+1424	The source is not a readable video file.
+1425	The save location points to the source. Choose another filename.
+1426	A temporary file could not be created at the save location. Check free space and write permissions.
+1427	The source changed while copying. The destination was not replaced. Wait for recording to finish saving and try again.
+1428	Invalid project file type or size: {0}
+1429	The project package is not a valid regular folder.
+1430	The project manifest version, paths, dependencies or limits are invalid.
+1431	The project package has missing files or files not listed in the manifest.
+1432	The video project entry is invalid.
+1433	The camera dependency path does not match.
+1434	The pointer source dependency path does not match.
+1435	The project contains an unsupported dependency.
+1436	A tutorial dependency type is invalid.
+1437	A source file changed during packaging. The package was not committed.
+1438	Project filenames conflict or exceed the capacity limit.
+1439	Unable to open project media: {0}
+1440	Project media is not a regular file.
+1441	Project media size does not match: {0}
+1442	A project staging file could not be created.
+1443	Project media is still growing. It was not packaged.
+1444	Project media verification failed: {0}
+1445	The project manifest exceeds the limit.
+1446	The project destination already exists. Choose a new name; nothing was overwritten.
+1447	Editable video packages support MP4, MOV and M4V media.
+1448	The project on disk changed. It was not packaged.
+1449	The interaction timeline is invalid.
+1450	Editable pointer media is missing. The project was not packaged.
+1451	The music file extension is invalid.
+1452	The project changed during packaging. Nothing was committed.
+1453	The project changed before commit. It was not packaged.
+1454	Valid video editing settings are missing.
+1455	The tutorial entry is invalid.
+1456	An image dependency is missing from the tutorial.
+1457	Project video media cannot be read or has no video track.
+1458	Project captions or trim ranges exceed the media duration.
+1459	Project music has no audio track.
+1460	The project refers to an external music path. It was not opened.
+1461	The import destination already exists.
+1462	Interaction timeline settings are invalid.
+1463	The drawing timeline is invalid or contains unsupported image markers.
+1464	The pointer source association does not match the manifest.
+1465	The project requires camera media, but that dependency is missing.
+1466	The destination exists or the project on disk changed. The delivery package was not exported.
+1467	Editable.deskvideo contains source media and editing settings. Review Video.mp4 and Captions.srt separately before sharing; the project package is not a redacted video.\n
+1468	Read Me.txt
+1469	The destination folder exists. It was not overwritten.
+1470	The delivery folder exists. It was not overwritten.
+1471	Project dependency state could not be read.
+1472	Project dependencies must be regular files, not symbolic links.
+1473	Source media or dependencies changed during export. The delivery output was not committed.
+1474	The video has no measurable video track.
+1475	The frame count exceeds the measurement limit.
+1476	There are too few video frames to measure intervals.
+1477	The video presentation-time index is invalid.
+1478	Source Audio
+1479	Audio Track {0}
+1480	Select 1–1,000 recordings and a new output folder.
+1481	Recording export does not accept symbolic links or special files.
+1482	A batch supports up to 20,000 files and 20 GB.
+1483	The media is not part of the current recordings library.
+1484	Recording media could not be enumerated.
+1485	This recording has no finished video. Recover it first or explicitly export all media.
+1486	The recording transaction path is invalid. Files were not changed.
+1487	Recording transaction paths do not accept symbolic links.
+1488	The recovery root is not a regular folder.
+1489	The recording transaction cleanup scope is invalid.
+1490	The recovery folder still contains media. The folder and log were kept.
+1491	The recording recovery log exceeds 1 MB.
+1492	The recording recovery log is invalid.
+1493	Recording recovery found a conflict or missing file. Original files and logs were kept.
+1494	The recording transaction lock could not be opened.
+1495	Another operation is updating recordings. Try again later.
+1496	The recording folder is missing or the destination has a folder with that name. Nothing was overwritten.
+1497	The recording transaction still needs recovery. Its folder and log were kept: {0}
+1498	Select 1–1,000 items from the local recordings library.
+1499	Recovery folders do not accept symbolic links.
+1500	The recording recovery manifest exceeds 256 KB.
+1501	The recording recovery manifest is invalid.
+1502	The recording recovery batch changed.
+1503	Batch Recording Organization and Recovery
+1504	Original Segments
+1505	Export all media, including camera, original segments and captions
+1506	Finished video, camera media, captions and segments restored with original classifications.
+1507	Remove {0} Selected Recordings?
+1508	Only selected sessions are removed. Finished video, camera media, captions and segments commit or roll back together. Other media and exports are kept.
+1509	Batch media operations are unavailable while recording.
+1510	Task cancelled. Committed batches are available in the library or recovery.
+1511	DeskCapture-Recording-Batch-{0}
+1512	Camera access is not authorized. Turn off picture-in-picture to continue recording the screen.
+1513	Audio input is not authorized. Allow microphone access in System Settings → Privacy & Security, or choose no audio.
+1514	The video source is still handling the previous request. No duplicate device operation was submitted.
+1515	Video source preparation exceeded 10 seconds. The original request is finishing in the background; no other device was selected.
+1516	The previous video source is still finishing. Original files are kept.
+1517	The selected video source could not start.
+1518	The selected video source disconnected. No other device was selected.
+1519	The camera is busy or could not start.
+1520	The selected audio source is unavailable. Refresh and select it again; no other microphone was selected.
+1521	The selected audio source could not be connected. Choose an available input.
+1522	This video device supplies no audio input. Choose its separate audio input, a microphone or no audio.
+1523	The audio connection could not be created. Recording did not start without audio.
+1524	The video source startup call has not returned. No duplicate request was submitted.
+1525	Camera startup timed out. Source media and the session lock were kept.
+1526	The video source is finishing or is not ready yet.
+1527	The video source connection is unavailable or the destination file exists. Nothing was overwritten.
+1528	The video source stop call has not returned. No duplicate request was submitted.
+1529	Camera file writing timed out. Source media and the lock remain until finalization finishes.
+1530	The video source has no segments or is completing a stop request.
+1531	The camera produced no usable frames.
+1532	A camera track could not be created.
+1533	The camera segment time range is invalid.
+1534	A camera microphone track could not be created.
+1535	There are no camera frames to merge. Source media and existing destinations were kept.
+1536	Circle
+1537	Person Cutout
+1538	Camera media has no video track.
+1539	Camera media has no displayable frames.
+1540	Camera orientation metadata is invalid.
+1541	Camera frame dimensions are invalid.
+1542	A camera preview frame could not be generated.
+1543	The camera preview frame could not be cached.
+1544	A camera decoding channel could not be created.
+1545	The camera video could not be decoded.
+1546	Camera frame timing is invalid.
+1547	Reading camera frames failed.
+1548	Checking camera media…
+1549	This video has no companion camera media. If the camera was enabled during recording, keep the original segments and check recording warnings.
+1550	Camera media was saved. Enable picture-in-picture to see it in the finished preview and drag it to reposition. Saving the source separately includes only the screen.
+1551	A camera file exists but no valid video can be read. The screen source was kept. Keep the recording segments; picture-in-picture was not confirmed saved.
+1552	Pointer timing or coordinates are invalid. Hidden ranges and movement paths each support up to 200 segments.
+1553	Pointer movement ranges cannot overlap.
+1554	The pointer is baked into this video or has no independent path, so it cannot safely be hidden or moved. Use a new recording with smooth pointer enabled.
+1555	The editable pointer source is missing or has no valid independent path. The original video was not changed.
+1556	Pointer
+1557	Hide Automatically
+1558	Path Easing
+1559	Hidden Ranges
+1560	Movement Paths
+1561	Add Path
+1562	Hide Start (seconds)
+1563	Hide End (seconds)
+1564	Delete Segment
+1565	Path Start (seconds)
+1566	Path End (seconds)
+1567	Start Horizontal Position
+1568	Start Vertical Position
+1569	End Horizontal Position
+1570	End Vertical Position
+1571	Path Actions
+1572	Delete Path
+1573	Live Recording Annotations
+1574	The project trim range is invalid.
+1575	Caption or editing project settings are invalid.
+1576	The project could not be read. The original file was kept.
+1577	The project exceeds the size limit or is not a regular file.
+1578	The project exceeded the size limit while being read.
+1579	The caption project write lock could not be opened.
+1580	Another process is saving this project.
+1581	Captions or settings on disk changed. Reopen and merge them; existing files were not overwritten.
+1582	The caption project exceeds 16 MB and was not saved.
+1583	The project on disk changed during saving. It was not overwritten.
+1584	Caption replacement settings exceed the processing limit.
+1585	A replaced caption would exceed 64 KB. Nothing was changed.
+1586	Caption replacement made no progress. Nothing was changed.
+1587	Replaced captions would exceed 16 MB. Nothing was changed.
+1588	Sentence editing supports up to 2,000 sentences at 0.25–4× speed.
+1589	There are no valid retained sentences, or captions extend beyond the source.
+1590	The caption search query is too long.
+1591	The editing preview could not be created.
+1592	Camera position or size is invalid.
+1593	Quality enhancement currently supports only SDR. For HDR, disable enhancement before exporting and check colors.
+1594	The video effects track could not be created.
+1595	Background music has no audio track.
+1596	The background music is too short.
+1597	No usable audio track remains after full-mix normalization.
+1598	Camera layouts and automation require readable camera media.
+1599	Camera frames could not be indexed. The redacted video was not exported.
+1600	The finished video export task could not be created.
+1601	The video destination is not a regular file. It was not replaced.
+1602	No video segment finished writing. Original files remain available in Finder.
+1603	DeskCapture-Recovered-{0}.mp4
+1604	The video preview source is invalid.
+1605	Recoverable Recording Segments
+1606	Video Preview
+1607	Original segments are still recoverable
+1608	Open Video Editor
+1609	Loading recordings…
+1610	Showing {0} of {1} recordings
+1611	{0} recordings
+1612	Found {0} recordings
+1613	Capture History…
+1614	Refresh Recordings
+1615	Open Video…
+1616	Search videos, captions or tags
+1617	Processing recordings…
+1618	Show 100 More
+1619	Remove This Recording (Recoverable)?
+1620	Move to Recovery
+1621	Finished video, camera media, segments and captions move to recovery together. Exported files are kept.
+1622	Searching videos…
+1623	Recordings Have Not Loaded
+1624	No Recordings Yet
+1625	No Matching Recordings
+1626	Favorite Recording
+1627	Recovering…
+1628	More Recording Actions
+1629	Edit Video
+1630	Open in System Player
+1631	Recover Recording Segments
+1632	Move to Recovery…
+1633	Recording Awaiting Recovery
+1634	Recoverable Segments
+1635	Saved Video
+1636	 · 
+1637	Moved to a recoverable batch. Restore it from batch organization.
+1638	Video and available editing timeline recovered. Original segments were kept.
+1639	Usable segments recovered; skipped {0} unfinished segments.
+1640	Recovery cancelled. Original segments were kept.
+1641	Smooth
+1642	Linear
+1643	Motion optics settings are out of range.
+1644	Camera Motion
+1645	Zoom Easing
+1646	Motion Blur
+1647	Camera Motion Blur
+1648	Shutter
+1649	Samples
+1650	Maximum Trail
+1651	Recording Region
+1652	Resource counters for this process could not be read.
+1653	The caption file state could not be read. Search did not finish.
+1654	The caption file type or size is invalid. Search did not finish.
+1655	The recording search library exceeds capacity or has duplicate entries.
+1656	Captions are changing. Search again.
+1657	Recording search text exceeds 128 MB. Results were not truncated.
+1658	Recording finalization timed out. Completed segments remain on your Mac.
+1659	The recording session lock could not be created.
+1660	The recording session is still in use.
+1661	Recording recovery manifest settings are invalid.
+1662	Recording segment order is invalid.
+1663	The recovery manifest type or size is invalid.
+1664	The recovery checkpoint exceeds the limit. Finish recording and save.
+1665	The recording checkpoint could not be opened.
+1666	The recovery checkpoint is missing or truncated.
+1667	The recovery checkpoint could not be read completely.
+1668	The recovery timeline has invalid order or data.
+1669	The recovery timeline exceeds the processing limit.
+1670	Recovery records exceed the limit.
+1671	The recovery checkpoint count does not match. The source was not rewritten.
+1672	The recording recovery manifest is missing.
+1673	No readable recording segments were found. Original files were kept.
+1674	DeskCapture-Recovered-Source.mp4
+1675	DeskCapture-Recovered.mp4
+1676	The disk budget is invalid.
+1677	Available disk space could not be confirmed. Writing did not continue.
+1678	Not enough disk space. This operation requires at least {0} MB reserved. Recorded source media was kept.
+1679	The caption project was removed. Open it again.
+1680	An audio track volume is invalid.
+1681	Audio settings are invalid. Choose either peak normalization or integrated loudness normalization.
+1682	Floating-point audio could not be read.
+1683	Color blending requires a valid RGB image and selection.
+1684	The selection exceeds the color-blending limit. Use a smaller area or disable edge color blending.
+1685	The color-blending area could not be read.
+1686	Edge color blending is for opaque regions. Disable it for transparent edges.
+1687	Color blending needs unselected background around the area. Use a smaller selection.
+1688	Color blending did not converge within its limit. Use a smaller area or disable this option.
+1689	The color-blended result could not be created.
+1690	A model repair is running. Finish or cancel it before managing models.
+1691	Choose a Core ML .mlmodel, .mlpackage or .mlmodelc file.
+1692	The model must have two same-size image inputs, one named with mask, and one image output, with edges of 16–1,024 pixels. MultiArray models are unsupported.
+1693	This model folder does not belong to the app. It was not removed.
+1694	A model repair task is already running. Finish or cancel it first.
+1695	The selected model was not found. Import it or use texture repair.
+1696	The model input format changed. Import the model again.
+1697	The repair model returned no image.
+1698	The repair output dimensions exceed the limit or cannot be read.
+1699	Model input could not be allocated.
+1700	Model input conversion failed.
+1701	Models cannot contain symbolic links.
+1702	The model is empty or exceeds 1.5 GB.
+1703	The model folder cannot be read.
+1704	The model contains links or more than 10,000 files.
+1705	The model exceeds 1.5 GB.
+1706	The model folder is empty.
+1707	The selection exceeds 16 million pixels or the brush-stroke limit. Process smaller regions.
+1708	A brush-stroke range is invalid.
+1709	Brush-stroke calculation exceeds the limit. Use fewer strokes or process separately.
+1710	This pixel format cannot precisely preserve pixels outside the selection. Save as an 8-bit PNG first.
+1711	The repair area is invalid or exceeds the processing limit.
+1712	Repair pixels could not be generated.
+1713	The image pixel data is incomplete.
+1714	The repair result could not be created.
+1715	Texture Repair
+1716	Smooth Repair
+1717	Sample Repair
+1718	Offline Model
+1719	Restore Original Pixels
+1720	Erase Background
+1721	Nearby Background
+1722	Expanded Background
+1723	The model reference area is invalid or exceeds the pixel limit.
+1724	Paint the area to process first.
+1725	Import and select a compatible local model first, or use texture repair.
+1726	The model repair area could not be read.
+1727	The original image size does not match the current result.
+1728	Choose a sample point first.
+1729	Repair failed. Try another sample area.
+1730	Checkerboard
+1731	A user-imported local model. This app does not distribute its weights.
+1732	Select a valid subject number.
+1733	Image Repair
+1734	Choose Sample Position
+1735	Repair Method
+1736	Choose Sample Point
+1737	Change Sample Point
+1738	Blend Edge Colors
+1739	Choose Model
+1740	Reference Area
+1741	Manage Models
+1742	Move to Trash
+1743	Brush and Selection
+1744	Erase Selection
+1745	Brush Size
+1746	Edge Blending
+1747	Show Selection
+1748	Undo Stroke
+1749	Clear
+1750	Repair Selection
+1751	Subject Cutout
+1752	Recognize Subjects
+1753	Subject {0}
+1754	Keep Selected Subjects
+1755	Canvas Display
+1756	Transparent Areas
+1757	Import a local Core ML repair model you have rights to use. Supports image plus mask-image inputs and image output. The original model is not modified.
+1758	Manual refinements and the subject mask have different dimensions.
+1759	The refinement pixel format differs from the subject result. The current result was kept.
+1760	Refinement pixel data is incomplete.
+1761	The refined subject result could not be composed.
+1762	This image does not support a precise alpha mask. Save as an 8-bit RGB PNG first.
+1763	The image byte order does not support a precise alpha mask.
+1764	The image channel format does not support a precise alpha mask.
+1765	The alpha-masked result could not be created.
+1766	The camera stopped producing frames. Screen recording continues, saved camera media is kept, and missing ranges remain empty.
+1767	 Reason: {0}
+1768	A screen recording is already running.
+1769	Showing shortcuts requires Accessibility access. Turn off Keyboard Shortcut Badges in Settings to continue recording without it.
+1770	The window recording dimensions are invalid.
+1771	The display was disconnected.
+1772	Microphone access is not authorized. Turn off the microphone to record system audio only.
+1773	The speaker notes window cannot be a recording target.
+1774	The recording configuration is no longer valid.
+1775	The recording reached 1,000 segments. Finish and save, then start a new recording.
+1776	Recording writing was interrupted. Preserving recovery media.
+1777	Low disk space. Finishing recording and preserving recoverable source media.
+1778	The recovery checkpoint was not saved. Finishing recording and preserving source media.
+1779	The window closed. Recording finished and was saved.
+1780	High recording load: skipped {0} video samples and {1} audio samples in total. Source media was kept. Try a smaller region or fewer concurrent tasks.
+1781	A camera segment did not finish. The screen recording was kept.
+1782	No recording file was found.
+1783	Camera composition failed. The screen video and original segments were kept.
+1784	DeskCapture-Annotated.mp4
+1785	Annotated video processing failed. The source video and annotation timeline were kept.
+1786	A video export track could not be created.
+1787	The recording is too short to export video frames.
+1788	Display settings changed. Finishing recording and preserving source media.
+1789	System recording was interrupted. Saving recoverable content.
+1790	Up
+1791	Down
+1792	Left
+1793	Right
+1794	This image format is unsupported on this system.
+1795	The PDF file could not be created.
+1796	Cropping PDF pages failed.
+1797	Slow · Dynamic Pages
+1798	Standard
+1799	Fast · Static Pages
+1800	Boundary Reached
+1801	Not Scrolled Yet
+1802	No Further Scrolling
+1803	The scrolling capture frame exceeds the capacity limit.
+1804	The fixed-bar range is invalid. Content must be at least 20 pixels high.
+1805	A reliable join could not be found. Capture paused and existing content was kept. Save the current capture, or scroll back to the end of the preview and continue.
+1806	Scrolling capture dimensions exceed the index range. Original content was kept.
+1807	Scrolling capture dimensions exceed the index range. Current content was kept.
+1808	The new scrolling capture content could not be cropped.
+1809	There is no scrolling capture segment to undo.
+1810	The scrolling preview could not be created. Current content was kept.
+1811	The scrolling preview could not be created.
+1812	The fixed-bar preview could not be created. Existing content was kept.
+1813	The fixed-bar preview could not be created.
+1814	Scrolling capture tiles could not be saved.
+1815	The original scrolling capture frames could not be saved.
+1816	The capture is too large for a single image. Choose PNG tiles or paginated PDF. Original segments were kept.
+1817	There is no scrolling capture to export.
+1818	The original fixed-bar frame could not be read.
+1819	The fixed bars could not be read.
+1820	The scrolling capture tiles could not be read.
+1821	There are no segments to export.
+1822	The fixed-bar settings could not rebuild existing segments. The original result was kept.
+1823	Automatic scrolling requires Accessibility access. Grant permission to enable it. Captured content will be kept.
+1824	The original window could not be activated. Capture paused. Click it and continue; existing segments were kept.
+1825	Scroll target updated. Check the preview before continuing. Existing segments were kept.
+1826	Fixed-bar settings did not finish: {0} The original result was kept.
+1827	Scroll point set. Confirm it is inside the content area before enabling automatic scrolling. Existing segments were kept.
+1828	No scrollable container was recognized. Adjust the scroll point or continue manually.
+1829	Scroll area refreshed. Check the preview before continuing.
+1830	Switched to manual. {0}Scroll back slightly, then scroll slowly {1} to find the join. Captured content was kept.
+1831	Switched to manual. Scroll the original window slowly to continue.
+1832	Last segment undone. Scroll the page {0} to the previous segment, then scroll slowly {1} to continue.
+1833	The selected webpage or document moved, closed or switched desktops. Restore it and select the area again.
+1834	The page position cannot currently be read. Restore it on screen and select the area again.
+1835	The selected window closed, was hidden or resized. Captured content was kept. Restore the window to continue.
+1836	The window size or state changed during capture. Capture paused and the scrolling image was kept.
+1837	The window scale changed. Captured content was kept. Save it before starting a new window capture.
+1838	The original window does not have focus. Capture paused. Click it to continue; existing segments were kept.
+1839	The original target window cannot be read. Capture paused. Restore it to continue; captured content was kept.
+1840	The original window is hidden or minimized. Capture paused. Restore it to continue; captured content was kept.
+1841	The original window size changed. Capture paused. Restore its size to continue; captured content was kept.
+1842	The original window position changed. Capture paused. Restore its position to continue; captured content was kept.
+1843	The scroll container changed or cannot be confirmed. Capture paused. Refresh the region or continue manually.
+1844	Choose a scroll container, correct the scroll point or continue manually.
+1845	The target window is no longer available. Select it again.
+1846	The scroll area is obscured. Capture paused. Move the covering window to continue; captured content was kept.
+1847	The page is still changing. Stay at this position and wait…
+1848	The image is not stable. Stop scrolling and wait for the content to load…
+1849	The page keeps changing. Capture paused and segments were kept. Stop animations or wait for loading before continuing.
+1850	Scrolling has not reached the requested position. Keeping overlap and waiting…
+1851	The top or bottom appears fixed, but it may be repeated content. Choose how to retain it, then capture will continue.
+1852	No reliable join was found. Scroll back slightly {0}, then scroll slowly {1}. Avoid fixed bars and moving content.
+1853	Reduced to slow speed. Waiting for the page to settle and retrying at this position…
+1854	Bottom
+1855	Right Edge
+1856	Left Edge
+1857	Reached the {0} of this scroll area. Content was kept. Finish editing or continue after more content loads.
+1858	The target did not respond to scrolling. Select the page content or switch to manual scrolling. Existing frames were kept.
+1859	The image stopped scrolling, but a boundary is not confirmed. Finish with the current result or select content and continue. Existing segments were kept.
+1860	The scrolling capture data is no longer available.
+1861	The editor cannot open right now. The scrolling capture was kept and can be saved or copied.
+1862	Finishing was cancelled. The scrolling capture was kept; continue capturing, save or copy it.
+1863	Unable to open editor: {0} The scrolling capture was kept. Retry, save or copy it.
+1864	Copying cancelled. The scrolling capture was kept; continue capturing, save or copy it.
+1865	Copying did not finish: {0} The scrolling capture was kept. Retry or save it.
+1866	Export cancelled. The destination and capture segments were kept. Export again when ready.
+1867	Saving did not finish: {0} Save again or copy the result.
+1868	This window is too large for scrolling capture. Resize it and try again.
+1869	Scroll Area {0} × {1}
+1870	Select Scrollable Content
+1871	Recognizing…
+1872	Refresh
+1873	No Scroll Area Recognized
+1874	Region {0}
+1875	Exact Position
+1876	Horizontal
+1877	Vertical
+1878	Manual Scrolling
+1879	Use and Continue
+1880	Click the actual image to set the scroll point, or choose a numbered content area
+1881	Scrollable content preview; use the area list or exact position below
+1882	Generating
+1883	Preparing Editor
+1884	Saving
+1885	Exporting Tiles
+1886	Cancelling
+1887	Generating the scrolling image to copy. Capture segments were kept.
+1888	Preparing the editor. Capture segments remain until handoff completes.
+1889	Saving the scrolling image. Capture segments were kept. You can cancel this export.
+1890	Exporting full-resolution tiles. Capture segments were kept.
+1891	Handling cancellation. Wait for the current operation to finish.
+1892	The scrolling join could not be checked. Captured content was kept.
+1893	Fixed bars and content could not be checked. Captured content was kept.
+1894	Changing Areas at This Position
+1895	Detected {0} Approximate Areas
+1896	Dynamic area preview, {0} approximate areas
+1897	Choosing a save location. Cancelling restores the capture state.
+1898	Window Scrolling Capture · {0}
+1899	{0} Scrolling Capture
+1900	Scrolling Screenshot
+1901	Horizontal Scrolling Capture
+1902	Choose Position
+1903	Processing
+1904	Join Needs Recovery
+1905	Paused
+1906	Waiting for Stability
+1907	Capturing
+1908	Select Scrollable Content…
+1909	Continue Manually
+1910	Merge Fixed Bars and Continue
+1911	Keep Everything and Continue
+1912	Capturing the window “{0}”
+1913	Expand Preview
+1914	Collapse Preview
+1915	Manual Scroll Stitching
+1916	Automatic Scrolling
+1917	Permission Settings
+1918	Scroll Speed
+1919	Choose Scroll Area…
+1920	View Dynamic Areas…
+1921	Export PNG Tiles Folder…
+1922	Scrolling Capture Options
+1923	Keep fixed bars only once in the result
+1924	Keep Fixed Bars Once
+1925	{0} segments
+1926	Follow New Content
+1927	Undo Last Segment
+1928	View Details
+1929	View Full Image
+1930	Resume Capture
+1931	Pause Capture
+1932	Cancel Finishing
+1933	Cancel Scrolling Capture
+1934	Finish and Copy
+1935	Save PDF…
+1936	Export Tiles…
+1937	Export full-resolution PNG tiles and their position manifest
+1938	Finish scrolling capture and copy
+1939	Save to history and open the editor to annotate, remove strips and save
+1940	The first-frame sampling budget is invalid.
+1941	First-frame pixel dimensions changed. Select the scroll area again.
+1942	The first frame is still loading or changing significantly. Wait for stability and start again.
+1943	Stitched scrolling preview, {0} × {1} pixels, {2} segments
+1944	Scrolling capture selection border
+1945	Tile dimensions exceed the memory limit.
+1946	A scrolling segment could not be read. The original result was kept.
+1947	Tile rendering failed.
+1948	The tile range is invalid.
+1949	The tile destination is not a folder. The original file was kept.
+1950	The PDF destination is a folder. Original content was kept.
+1951	The paginated PDF could not be created.
+1952	The visibility-check budget is invalid.
+1953	The target content has transparent areas, so full visibility cannot be confirmed. Select opaque content. Existing segments will be kept.
+1954	The target and visible image differ, so full visibility cannot be confirmed. Wait for stability or move obstructions. Existing segments will be kept.
+1955	Visibility-check image dimensions or budgets differ.
+1956	Visibility pixels for the full region could not be read.
+1957	The selection extends beyond the target window. Keep it entirely inside one window. Existing segments will be kept.
+1958	Another window covers the selection, so full visibility cannot be confirmed. Move it before continuing. Existing segments will be kept.
+1959	The window “{0}” covers the selection, so full visibility cannot be confirmed. Move it before continuing. Existing segments will be kept.
+1960	The original target window is hidden or closed. Restore it before continuing. Existing segments will be kept.
+1961	Use a single-frame image, up to 32 million pixels and a 16,000-pixel edge.
+1962	The redaction area or image exceeds the processing limit.
+1963	The redacted copy could not be rendered.
+1964	The redacted PNG could not be created.
+1965	Writing the redacted PNG failed.
+1966	Committing the redacted PNG failed. The destination was kept.
+1967	The redacted PNG has an unexpected size.
+1968	The pixel PNG could not be created.
+1969	PNG data ended early.
+1970	The PNG signature is invalid.
+1971	The PNG chunk count exceeds the limit.
+1972	The PNG chunk range is invalid.
+1973	PNG pixel data is incomplete.
+1974	Choose 1–20 images at a time.
+1975	The temporary folder already exists. It was not reused or cleaned up.
+1976	A batch is limited to 128 million pixels. Process smaller batches.
+1977	Review and confirm each image first.
+1978	Choose images to review. Original files and projects are kept separately.
+1979	Created independent temporary snapshots. Review and confirm each one.
+1980	Checks complete. Deselect false positives and select missed areas, then confirm each image.
+1981	DeskCapture-Redacted-{0}
+1982	Exported {0} independent PNG files: {1}
+1983	Batch Sensitive Information Review
+1984	Check Entire Batch
+1985	Image
+1986	{0} / {1}{2}
+1987	 · Reviewed
+1988	Choose Up to 20 Images
+1989	Recognition Candidates
+1990	Image {0}: Recognition Candidates
+1991	Undo Last Selection ({0})
+1992	I Have Reviewed This Image
+1993	Export Redacted Copies…
+1994	Email
+1995	Phone
+1996	National ID
+1997	Bank Card
+1998	Secret Key
+1999	Check Sensitive Information
+2000	Custom Rules
+2001	Recognizing and checking locally…
+2002	Candidates:
+2003	No text matched the selected rules.
+2004	Check Again
+2005	Select All
+2006	Redact {0} Lines
+2007	The image changed. Check it again before redacting.
+2008	The image changed during checking. Check it again.
+2009	Contains Text
+2010	Line Prefix
+2011	Restricted Regex
+2012	All
+2013	Text
+2014	Custom Field
+2015	Order Number
+2016	Rule patterns must be 1–256 characters and no larger than 1 KB.
+2017	Restricted regex does not support groups, alternatives, backreferences or unlimited repetition. Use character classes and {n} or {n,m} with 1–64 repeats and only one variable-length repeat.
+2018	Use up to 32 rules with unique identifiers.
+2019	Rule names must be 1–40 characters; patterns must be 1–256 characters and no larger than 1 KB.
+2020	Review up to 5,000 lines at once. Process smaller regions.
+2021	Text or rule processing exceeded the limit. Checking did not finish. Use fewer rules or review smaller regions.
+2022	The rule configuration exceeds 64 KB.
+2023	Custom rules were not loaded: {0} The original configuration was kept.
+2024	Order Number ABC123
+2025	Local Sensitive Information Rules
+2026	No Custom Rules
+2027	Rule Name
+2028	Delete Rule
+2029	Enable Rule
+2030	Match Method
+2031	Scope
+2032	Match Content
+2033	Text or restricted regex
+2034	Case Sensitive
+2035	Try Rules
+2036	Sample Text (Image Scope)
+2037	Enter one line of text
+2038	Check Matches
+2039	Save Rules
+2040	Sample text is limited to 16 KB.
+2041	Matched: 
+2042	No custom rule matched.
+2043	Settings Sections
+2044	Version {0}
+2045	Development Build
+2046	Close Settings
+2047	Appearance
+2048	Theme
+2049	Hide Desktop Content
+2050	Window Background
+2051	Window Shadow
+2052	Copy and History
+2053	Match Screen Size When Pasting
+2054	Copy Image After Saving
+2055	Recognize Text in History
+2056	Updates
+2057	Screen Capture Permission
+2058	Screen Capture Available
+2059	Permission Not Yet Confirmed
+2060	Open System Settings
+2061	Check Permission Again
+2062	Global Shortcuts
+2063	Region Capture Preset
+2064	Choose Preset
+2065	Record Shortcut
+2066	Built-in Shortcuts
+2067	Visibility and Order
+2068	Screenshot Workflows
+2069	Automatic Scrolling by Default
+2070	Local History
+2071	Automatic Cleanup
+2072	History cleanup failed: {0}
+2073	Never
+2074	After 7 Days
+2075	After 30 Days
+2076	After 90 Days
+2077	History Files
+2078	Open Folder
+2079	Local Usage Statistics
+2080	Count Feature Usage
+2081	View Usage Counts
+2082	{0} times
+2083	Reset Statistics
+2084	Clear Counts
+2085	Press a key combination now…
+2086	Include the ⌘ or ⌃ modifier
+2087	Shortcut; click and press a key combination
+2088	Clear the shortcut or cancel recording
+2089	Clear Shortcut
+2090	Composition sampling is invalid.
+2091	Composition sampling failed.
+2092	Composition dimensions or center are invalid.
+2093	Smart Composition
+2094	Frame Position
+2095	Manual
+2096	Center
+2097	Speaker notes font size, scroll speed, opacity or dimensions are invalid.
+2098	Speaker notes exceed 64 KB. The original text was kept. Split the script.
+2099	The script has too many lines. Split it into smaller scripts.
+2100	The recording filter cannot confirm that speaker notes are excluded. The notes window was not shown.
+2101	Recording Speaker Notes
+2102	Import TXT…
+2103	Speaker Notes Text
+2104	Teleprompter
+2105	Show While Recording
+2106	Return to Start
+2107	Position
+2108	Top of Display
+2109	Bottom of Display
+2110	Export Speaker Notes…
+2111	Speaker notes are limited to 64 KB.
+2112	Choose a UTF-8 text file.
+2113	Speaker Notes.txt
+2114	Speaker notes exceed 64 KB. Split them first.
+2115	Show Teleprompter
+2116	Edit Script and Display Settings…
+2117	Recording Teleprompter
+2118	Spectral noise reduction could not be initialized.
+2119	{0} Startup Guide
+2120	Here I Am
+2121	Click the icon above to start capturing
+2122	Open the {0} menu
+2123	Close Startup Guide
+2124	Capture the Moment
+2125	Close Menu
+2126	Device Recording in Progress
+2127	Capture in Progress
+2128	Repeat Region
+2129	Timer
+2130	Recordings Library
+2131	Floating Quick Panel
+2132	Capture Scrolling Up
+2133	Record Window
+2134	Unlock All Pinned Images
+2135	More Actions
+2136	Quit {0}
+2137	Capture Region {0}
+2138	Scrolling Region
+2139	Preparing Recording
+2140	Saving Recording
+2141	Recording Paused
+2142	Recording
+2143	Processing Scrolling Capture
+2144	Scrolling Capture in Progress
+2145	Last Export
+2146	Show in Finder: {0}
+2147	Show last exported {0} in Finder
+2148	{0} · ⌘{1}
+2149	Enter text, then press Return
+2150	Plain Text
+2151	Sample
+2152	Select Annotation
+2153	Pin to Screen
+2154	Toolbar Layout
+2155	Restore Defaults
+2156	Toolbar Button Order
+2157	Drag to Reorder
+2158	Show {0}
+2159	Move to Beginning
+2160	Move Forward
+2161	Move Backward
+2162	Move to End
+2163	Change the position of {0}
+2164	Capture Selection
+2165	Cancel Capture
+2166	Finish Current Capture
+2167	Return / Double-click Selection
+2168	Copy and Finish (Copy HEX in Color Picker)
+2169	Save Image
+2170	Toggle Color Picker
+2171	Copy HEX / RGB in Color Picker
+2172	Copy RGB in Color Picker
+2173	Annotation Editing
+2174	Undo / Redo
+2175	Select All Annotations
+2176	Duplicate Selected Annotation
+2177	Nudge Selection or Annotation
+2178	Arrow Keys / ⇧Arrow Keys ×10
+2179	Select Multiple Annotations
+2180	⇧Click
+2181	History Editor
+2182	Copy / Save Image
+2183	Zoom Out / In
+2184	Actual Size / Fit to Window
+2185	App and Pinned Images
+2186	Settings / Quit
+2187	Move Pinned Image / Close Pinned Image
+2188	Arrow Keys / Esc
+2189	Capture and Editing Shortcuts (Built-in)
+2190	Find Captions
+2191	Find Text
+2192	Current Caption
+2193	Go to Current Sentence
+2194	Replace With
+2195	Replace All
+2196	Replace Matching Text
+2197	{0} sentences match; showing {1}
+2198	Keep
+2199	Cut
+2200	Show 100 More Sentences
+2201	Correct Text
+2202	Caption Text
+2203	Correction Actions
+2204	Apply Corrections
+2205	Sentence Order
+2206	Move Sentence Up
+2207	Move Sentence Down
+2208	Copy Captions
+2209	Copy Sentence
+2210	Sentence Speed
+2211	Sentence Editing
+2212	Build in Sentence Order
+2213	Undo Changes
+2214	Undo Last Step
+2215	Caption changes exceed the processing limit.
+2216	Caption timing must stay within the source video.
+2217	Tutorial steps, image paths, click coordinates or counts are invalid.
+2218	Tutorial text exceeds 2 MB.
+2219	A tutorial image is missing, damaged or too large: {0}
+2220	Tutorial images could not be compared.
+2221	The merge step does not exist.
+2222	The tutorial HTML staging file could not be created.
+2223	HTML exceeds the 1.5 GB limit.
+2224	<!doctype html><meta charset='utf-8'><meta name='viewport' content='width=device-width'><title>Step-by-Step Tutorial</title><style>body{font:16px -apple-system,sans-serif;max-width:1000px;margin:40px auto;padding:0 24px;color:#183041}section{margin-bottom:48px}p{white-space:pre-wrap}figure{position:relative;margin:12px 0}img{width:100%;height:auto}b{position:absolute;transform:translate(-50%,-50%);background:#d83c46;color:white;border:2px solid white;border-radius:20px;padding:4px 8px}</style><h1>Step-by-Step Tutorial</h1>
+2225	The tutorial PDF could not be created.
+2226	{0}. {1}\n\n
+2227	The tutorial PDF exceeds 1,000 pages and was not exported.
+2228	The tutorial text could not be paginated. Nothing was exported.
+2229	The tutorial index type or size is invalid.
+2230	The tutorial save lock could not be opened.
+2231	Another process is saving this tutorial.
+2232	The tutorial on disk changed. It was not overwritten. Reopen the project to merge changes.
+2233	Tutorial Presets
+2234	Brand and Tutorial Presets
+2235	Preset Library
+2236	Import Preset…
+2237	Export Preset…
+2238	Legacy Preset
+2239	Preset
+2240	Save to Preset Library
+2241	Preset Saved
+2242	Import Background…
+2243	Palette and Annotation
+2244	Palette HEX
+2245	Record Current Annotation Style
+2246	Apply Preset
+2247	Current Annotation
+2248	Image rendering failed.
+2249	Use a 1–40-character name and up to 12 six-digit HEX colors.
+2250	Applied the style and palette for the next annotation. Canvas settings stay with the project.
+2251	Tutorial Preset.deskpreset
+2252	Preset exported without the current screenshot.
+2253	Tutorial Screenshot.png
+2254	Saved a preview copy with the background.
+2255	Preset version, name, colors or style settings are invalid.
+2256	A custom background must be a single-frame image up to 4 million pixels and 16 MB encoded.
+2257	Background encoding failed.
+2258	Background encoding failed or exceeds 16 MB.
+2259	The preset exceeds 24 MB.
+2260	The legacy preset's custom background is missing. It was not silently discarded.
+2261	The preset library exceeds 60 items. Remove some presets.
+2262	The preset library exceeds 64 MB. The original file was kept. Move some presets out first.
+2263	The local preset exceeds 24 MB. The original file was kept.
+2264	The preset identifier does not match its file. The original file was kept.
+2265	You can save up to 60 tutorial presets.
+2266	Saving would make the preset library exceed 64 MB.
+2267	The legacy preset index exceeds 128 KB.
+2268	There are more than 30 legacy presets.
+2269	The legacy background path is invalid.
+2270	Clicks could not be monitored. Start again.
+2271	Step {0}: {1}
+2272	Action
+2273	100 steps saved. Finish and export when ready.
+2274	This click was not captured: {0}
+2275	Saving the step failed. Changes remain in the editor: {0}
+2276	There are no steps to export yet.
+2277	Finish the current tutorial action first.
+2278	No adjacent steps were found with the same window, similar timing and position, and similar images.
+2279	Merged a group of nearby clicks. Original step images were kept; the merge can be undone.
+2280	Step-by-Step Tutorial
+2281	New Recording
+2282	Merge Nearby Clicks
+2283	Undo Merge
+2284	Unsaved Changes
+2285	No Tutorial Steps Yet
+2286	Step Title
+2287	Description
+2288	Step Description
+2289	Marker X
+2290	Marker Y
+2291	Merged step keeps {0} originals, shown individually on export
+2292	Split into Separate Steps
+2293	Image Title
+2294	Image Description
+2295	Move Step Up
+2296	Move Step Down
+2297	Delete Step
+2298	Cancel Action
+2299	Export
+2300	HTML or PDF…
+2301	Editable Project with Originals…
+2302	Delivery Folder with PDF, HTML and Original Project…
+2303	Save Changes
+2304	Step-by-Step Tutorial.pdf
+2305	Tutorial-Delivery
+2306	Tutorial.desktutorial
+2307	Includes original step images and descriptions. Existing folders are not overwritten.
+2308	Tutorial project exported with original step images
+2309	{0} steps
+2310	Layouts support up to 1,024 objects with unique identifiers.
+2311	Objects must stay inside the canvas, with text up to 256 characters.
+2312	The original position is invalid.
+2313	The layout hierarchy is invalid or contains a cycle.
+2314	Resize the image to 32 million pixels or fewer.
+2315	Rendering the simplified image failed.
+2316	Encoding the original image failed.
+2317	The project original exceeds 64 MB or could not be encoded.
+2318	The project exceeds 90 MB.
+2319	The project version or original image is invalid.
+2320	Project saved with a recoverable original. Use Save Simplified Image to share an image.
+2321	Interface Simplification
+2322	Placeholder {0}
+2323	Text {0}
+2324	Control {0}
+2325	Inside a candidate control
+2326	Original Content
+2327	Parent Control
+2328	Top Level
+2329	Show Text
+2330	Dark Style
+2331	Show Original Content
+2332	Bottom Edge
+2333	Delete Object
+2334	Project
+2335	Save Project…
+2336	Open Project…
+2337	Percentage
+2338	Tutorial Layout.deskui
+2339	Current Segment
+2340	Add 5 Seconds
+2341	Entire Video
+2342	Add Full Range
+2343	Retained Segments
+2344	Playback Speed
+2345	Speed
+2346	Segment Order
+2347	Move Segment Earlier
+2348	Move Segment Later
+2349	Go to Segment
+2350	Correct the time range. The end must not exceed the source duration.
+2351	Background Music
+2352	Add Audio…
+2353	Replace Audio…
+2354	Music Volume
+2355	Music File
+2356	Added
+2357	Music Actions
+2358	Remove Music
+2359	Importing audio…
+2360	The audio file exceeds 200 MB. Compress it first.
+2361	The selected file has no usable audio track.
+2362	Crop to Fill
+2363	Show Background
+2364	Choose video background: {0}
+2365	Video Background Style
+2366	Background Style
+2367	Video Processing in Progress
+2368	Wait for the current operation to finish, or cancel it before closing.
+2369	Continue Editing
+2370	Save Video Changes?
+2371	Save your edits to continue adjusting them next time. The source video will not be overwritten.
+2372	Do Not Save
+2373	The video could not play. Retry the preview.
+2374	Video preview preparation failed.
+2375	Video preview preparation timed out. Try again.
+2376	The video preview could not seek to that position.
+2377	Video preview decoding failed.
+2378	The first video frame timed out. Try again.
+2379	Video preview seeking timed out. Try again.
+2380	This frame could not be located. Choose another position.
+2381	Start {0}
+2382	Keep {0}
+2383	End {0}
+2384	Trim Start
+2385	Trim End
+2386	Source {0}
+2387	Expanded
+2388	Collapsed
+2389	Screen Source
+2390	Camera Source
+2391	Final Canvas
+2392	Solid Redaction
+2393	Highlight (Not Redacted)
+2394	Video regions support up to 500 segments, with valid timing and normalized coordinates inside the source.
+2395	Redaction and Highlighting
+2396	Add Redaction Region
+2397	Show 50 More Regions
+2398	Entire Video
+2399	%.2f–%.2f seconds
+2400	{0} · {1}
+2401	Region {0}, {1}, {2}
+2402	Expanded and editing
+2403	Remove Region {0}
+2404	Method
+2405	Time Range
+2406	Apply to Entire Video
+2407	Reference Frame
+2408	Seek and Refresh
+2409	Drag the box to edit this region. Other regions have blue borders.
+2410	Fine Adjustments
+2411	Region Width
+2412	Width
+2413	Region Height
+2414	Height
+2415	Safety Padding
+2416	Move to End
+2417	Correct timing or coordinates. The end must not exceed video duration and the region must remain inside the frame.
+2418	Reference frame unreadable: {0}
+2419	Video quality or memory budget settings are invalid.
+2420	Source video dimensions exceed the processing limit.
+2421	Estimated frame working set of {0} MiB exceeds the {1} MiB budget. Reduce output size or blur samples, or adjust the budget. This is not a hard limit on process RSS.
+2422	The quality-processing kernel could not be prepared. Disable enhancement before exporting.
+2423	Quality processing could not generate the current frame.
+2424	Quality
+2425	Smooth Gradients
+2426	Smoothing Strength
+2427	Sharpen
+2428	Sharpening Strength
+2429	Memory Budget
+2430	Smoothing Settings
+2431	Edge Threshold
+2432	Sample Radius
+2433	Dither Strength
+2434	Keep Full Frame
+2435	Follow Interaction Focus
+2436	Lock Focus
+2437	Reframing focus or safe-area settings are invalid.
+2438	Framing and Safe Area
+2439	Automatic Framing
+2440	Framing Mode
+2441	Top Margin
+2442	Bottom Margin
+2443	Left Margin
+2444	Right Margin
+2445	Automatic Picture-in-Picture Avoidance
+2446	Smooth Movement
+2447	Avoid Text
+2448	Lock Camera Position
+2449	Show Safe Area
+2450	Source-frame index duration is invalid.
+2451	Source-frame times could not be read. Redaction export did not start.
+2452	Source frames could not be indexed.
+2453	The source-frame index exceeds the limit. Nothing was exported.
+2454	The source-frame index exceeds the limit or uses an unsupported packed-time format. Nothing was exported.
+2455	Source video frame timing is invalid.
+2456	The source-frame index is incomplete.
+2457	Source-frame timing or edit lists exceed the limit. Nothing was exported.
+2458	Video edit list time ranges are invalid. Nothing was exported.
+2459	Source-frame edit mapping exceeds the limit. Nothing was exported.
+2460	There are no displayable source-frame times. Nothing was exported.
+2461	Sampled text avoidance supports source videos up to 60 minutes long.
+2462	Text-area analysis exceeded 180 seconds. No finished video was committed. Disable sampled text avoidance or shorten the media.
+2463	Sampled text frame timing is invalid.
+2464	No valid SRT captions were found.
+2465	System transcription requires macOS 26. Choose a local model or import SRT.
+2466	This device does not support system transcription. Choose a local model or import SRT.
+2467	This device does not currently support local transcription in the selected language.
+2468	The video has no audio track for transcription.
+2469	Not enough video content remains after cuts.
+2470	An editing segment has invalid timing or speed.
+2471	No editing segments are retained.
+2472	Zoom
+2473	Automatically Follow Clicks
+2474	Automatic Zoom
+2475	Duration
+2476	Zoom Segments
+2477	Segment Zoom
+2478	General
+2479	Shortcuts
+2480	Toolbar Buttons
+2481	Recording
+2482	Storage and Privacy
+2483	Make each capture fit the way you work.
+2484	Set global shortcuts and view in-app shortcuts.
+2485	Choose frequently used buttons and arrange their order.
+2486	Adjust audio, camera and presentation effects.
+2487	Media and text are stored on your Mac.
+2488	{0} items selected
+2489	Annotation Actions
+2490	Select All ⌘A
+2491	Duplicate Selected ⌘D
+2492	Delete Selected
+2493	Snap While Dragging
+2494	Content Bounds and Size…
+2495	Brand and Tutorial Presets…
+2496	Image Comparison and Differences…
+2497	Shift-click for multiple annotations; arrow keys to nudge, Shift to move faster
+2498	Cancel Image Processing
+2499	Cancel Alignment
+2500	Repair Brush
+2501	Hide Text
+2502	Select an annotation to drag it, change properties or press Delete
+2503	Export covers this area with black pixels. History keeps the original.
+2504	Image Actions
+2505	Style Current Image ⇧⌘B
+2506	Saving history copy…
+2507	Cancel Save
+2508	Zoom Image Out
+2509	Zoom Image Out ⌘−
+2510	Fit to Window
+2511	Image zoom; 100% shows original image pixels
+2512	Zoom Image In
+2513	Zoom Image In ⌘+; or pinch with the trackpad
+2514	Pinned Image
+2515	Drag to move; double-click to close
+2516	Drag the image to move
+2517	Click-through: clicks reach the window below and this image cannot be dragged. Unlock it from the menu bar.
+2518	Close Pinned Image
+2519	Voice, loudness or music ducking settings are out of range.
+2520	Audio model measurements are invalid.
+2521	The local audio measurement engine is not bundled.
+2522	Finished Audio Measurement
+2523	The measurement report is too large.
+2524	The local voice engine is not packaged correctly. Existing output was not replaced.
+2525	Voice processing requires at least 5 GB of temporary space. Processing did not start.
+2526	Local Audio Engine
+2527	The audio report exceeds the processing limit.
+2528	The audio processing frame count does not match.
+2529	Voice processing supports readable audio up to 60 minutes long.
+2530	The PCM channel format does not match.
+2531	Audio duration exceeds 60 minutes.
+2532	Voice track conversion did not finish.
+2533	The audio track could not be packaged.
+2534	The processed audio track is incomplete.
+2535	The audio track could not be written.
+2536	Compare Original Audio
+2537	Voice Enhancement
+2538	Enhance Voice
+2539	Mix
+2540	Loudness
+2541	Normalize Loudness
+2542	Target Loudness
+2543	Peak Ceiling
+2544	Music Ducking
+2545	Lower Music While Speaking
+2546	Reduction
+2547	Attack
+2548	Release
+2549	Hold
+2550	Open Local Screenshot Workflow
+2551	Open the visible workflow editor, optionally specifying a saved workflow ID.
+2552	Workflow ID (Optional)
+2553	The workflow ID must be a complete UUID.
+2554	The app has not finished starting. Try again shortly.
+2555	Open {0} Workflow
+2556	Open Workflow
+2557	The bundled workflow sample image is missing. Reinstall the app.
+2558	Brand Preset
+2559	Use Saved Brand Preset
+2560	Use Styling Settings Instead
+2561	Long-Edge Limit (pixels)
+2562	Long-Edge Pixels
+2563	Padding Detection Tolerance
+2564	Flip Direction
+2565	Horizontal
+2566	Vertical
+2567	Confirm Redaction Areas at Runtime
+2568	Recognize the Processed Image
+2569	When Finished
+2570	Format
+2571	Save To
+2572	Choose Fixed Folder…
+2573	Choose Location Each Time
+2574	Choose Each Time
+2575	Choose the save location when running
+2576	Filename Prefix
+2577	Custom Workflows
+2578	Manage Workflows…
+2579	Drag step {0} to reorder
+2580	Step {0} tool
+2581	Change step {0} tool: {1}
+2582	Collapse Settings
+2583	Expand Settings
+2584	Move Step {0} Up
+2585	Move Step {0} Down
+2586	Delete Step {0}
+2587	Step {0}
+2588	Background: {0}
+2589	Magic Wand
+2590	Palette
+2591	Camera
+2592	Aperture
+2593	Rotate
+2594	Recognize
+2595	Droplet
+2596	Stamp
+2597	Leaf
+2598	Flame
+2599	Sun
+2600	Moon
+2601	Cloud
+2602	Mountain
+2603	Paper Plane
+2604	Clipboard
+2605	Stack
+2606	Privacy
+2607	Confirm
+2608	Flag
+2609	Bookmark
+2610	Grid
+2611	Storage
+2612	Square
+2613	Gear
+2614	Choose Icon
+2615	Workflow Icon
+2616	Choose a workflow icon for the capture toolbar
+2617	Workflow preview supports up to 32 million pixels and 12 steps.
+2618	{0} runs when the workflow is started
+2619	Enter Watermark Text
+2620	Sensitive Information Review
+2621	Cancel Workflow
+2622	Preparing redaction preview…
+2623	{0} candidate lines
+2624	I have reviewed this redaction preview
+2625	Confirm Redaction and Continue
+2626	Check styling padding and corner radius settings.
+2627	Preview Only
+2628	Save Text
+2629	Text output requires Recognize Text as the final step.
+2630	Filename prefixes must be 1–40 characters without path separators. The save folder must be valid.
+2631	The workflow produced no text.
+2632	Choose the save folder again.
+2633	Save folder access expired. Choose it again.
+2634	The save folder is unavailable. Choose it again.
+2635	Copying text…
+2636	XML exceeds 10 MB.
+2637	Line {0}, Column {1}: {2}
+2638	The XML structure is invalid.
+2639	The XML node count exceeds the formatting limit.
+2640	XML nesting exceeds 128 levels and cannot be safely formatted.
+2641	Formatted output exceeds 20 MB.
+2642	Unable to save using the declared XML encoding {0}. Change the declaration to UTF-8 and try again.
+2643	{0} Menu
+2644	{0} menu (right-click for the system menu)
+2645	Quick Panel
+2646	Timed Capture
+2647	Finish Recording and Save
+2648	Pause / Resume Recording
+2649	Finish Scrolling Capture and Save File…
+2650	Edit Clipboard…
+2651	Recordings and Segment Recovery
+2652	Open Video for Editing…
+2653	Settings…
+2654	Main Menu
+2655	Hide {0}
+2656	Cut
+2657	Paste
+2658	Finish Scrolling Capture and Export PNG Tiles…
+2659	Finish Scrolling Capture and Save Paginated PDF…
+2660	Text or a PDF is being saved. Wait before quitting.
+2661	An editable image copy is being saved. Wait before quitting.
+2662	An image is being saved. Finish or cancel saving before quitting.
+2663	A video editor is processing. Finish or cancel the operation before quitting.
+2664	{0} editor windows have unsaved changes
+2665	Return to the editors to keep editable changes. Quitting discards these changes; source media and exports are kept.
+2666	Return to Editor
+2667	Discard Changes and Quit
+2668	The scrolling image is finishing writing. Wait before quitting.
+2669	The video is finishing writing. Wait before quitting.
+2670	No built-in camera is available.
+2671	Camera startup failed.
+2672	Pausing failed.
+2673	Resuming failed.
+2674	Saving failed.
+2675	The saved video has no valid picture or duration.
+2676	Live Editor · DeskCapture
+2677	Caption timing follows video cuts

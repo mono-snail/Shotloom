@@ -1,0 +1,286 @@
+{
+  "Help": {
+    "en": "Help",
+    "zh-Hans": "帮助"
+  },
+  "Shotloom Support…": {
+    "en": "Shotloom Support…",
+    "zh-Hans": "Shotloom 支持…"
+  },
+  "Support and Help": {
+    "en": "Support and Help",
+    "zh-Hans": "支持与帮助"
+  },
+  "Open Support Page": {
+    "en": "Open Support Page",
+    "zh-Hans": "打开支持页面"
+  },
+  "Open Local Screenshot Workflow": {
+    "en": "Open Local Screenshot Workflow",
+    "zh-Hans": "打开本地截图工作流"
+  },
+  "Open the visible workflow editor, optionally specifying a saved workflow ID.": {
+    "en": "Open the visible workflow editor, optionally specifying a saved workflow ID.",
+    "zh-Hans": "打开可见的工作流编辑器；可指定已保存的工作流ID。"
+  },
+  "Workflow ID (Optional)": {
+    "en": "Workflow ID (Optional)",
+    "zh-Hans": "工作流ID（可选）"
+  },
+  "Open Workflow": {
+    "en": "Open Workflow",
+    "zh-Hans": "打开工作流"
+  },
+  "帮助": {
+    "en": "Help",
+    "zh-Hans": "帮助"
+  },
+  "Shotloom 支持…": {
+    "en": "Shotloom Support…",
+    "zh-Hans": "Shotloom 支持…"
+  },
+  "支持与帮助": {
+    "en": "Support and Help",
+    "zh-Hans": "支持与帮助"
+  },
+  "打开支持页面": {
+    "en": "Open Support Page",
+    "zh-Hans": "打开支持页面"
+  },
+  "Support and Feedback": {
+    "en": "Support and Feedback",
+    "zh-Hans": "支持与反馈"
+  },
+  "Support and Feedback…": {
+    "en": "Support and Feedback…",
+    "zh-Hans": "支持与反馈…"
+  },
+  "New feedback": {
+    "en": "New feedback",
+    "zh-Hans": "新反馈"
+  },
+  "Your conversations": {
+    "en": "Your conversations",
+    "zh-Hans": "我的反馈"
+  },
+  "No feedback yet": {
+    "en": "No feedback yet",
+    "zh-Hans": "暂无反馈"
+  },
+  "Close": {
+    "en": "Close",
+    "zh-Hans": "关闭"
+  },
+  "Feedback type": {
+    "en": "Feedback type",
+    "zh-Hans": "反馈类型"
+  },
+  "Feedback title": {
+    "en": "Feedback title",
+    "zh-Hans": "反馈标题"
+  },
+  "Title (3–160 characters)": {
+    "en": "Title (3–160 characters)",
+    "zh-Hans": "标题（3–160 字符）"
+  },
+  "Description (10–5,000 characters)": {
+    "en": "Description (10–5,000 characters)",
+    "zh-Hans": "详细描述（10–5,000 字符）"
+  },
+  "Feedback description": {
+    "en": "Feedback description",
+    "zh-Hans": "详细描述"
+  },
+  "Email address": {
+    "en": "Email address",
+    "zh-Hans": "联系邮箱"
+  },
+  "App information": {
+    "en": "App information",
+    "zh-Hans": "应用信息"
+  },
+  "Include app information": {
+    "en": "Include app information",
+    "zh-Hans": "附带应用信息"
+  },
+  "Product": {
+    "en": "Product",
+    "zh-Hans": "产品"
+  },
+  "App version": {
+    "en": "App version",
+    "zh-Hans": "应用版本"
+  },
+  "System": {
+    "en": "System",
+    "zh-Hans": "系统"
+  },
+  "Language": {
+    "en": "Language",
+    "zh-Hans": "语言"
+  },
+  "Submit feedback": {
+    "en": "Submit feedback",
+    "zh-Hans": "发送反馈"
+  },
+  "Send reply": {
+    "en": "Send reply",
+    "zh-Hans": "发送回复"
+  },
+  "Write a reply": {
+    "en": "Write a reply",
+    "zh-Hans": "继续回复"
+  },
+  "You": {
+    "en": "You",
+    "zh-Hans": "你"
+  },
+  "Support team": {
+    "en": "Support team",
+    "zh-Hans": "支持团队"
+  },
+  "Contacting support": {
+    "en": "Contacting support",
+    "zh-Hans": "正在联系支持服务"
+  },
+  "Refresh": {
+    "en": "Refresh",
+    "zh-Hans": "刷新"
+  },
+  "Cancel": {
+    "en": "Cancel",
+    "zh-Hans": "取消"
+  },
+  "Feature request": {
+    "en": "Feature request",
+    "zh-Hans": "新功能"
+  },
+  "Bug report": {
+    "en": "Bug report",
+    "zh-Hans": "问题"
+  },
+  "Improvement": {
+    "en": "Improvement",
+    "zh-Hans": "建议"
+  },
+  "Other feedback": {
+    "en": "Other feedback",
+    "zh-Hans": "其他"
+  },
+  "Received": {
+    "en": "Received",
+    "zh-Hans": "已收到"
+  },
+  "Under review": {
+    "en": "Under review",
+    "zh-Hans": "处理中"
+  },
+  "Planned": {
+    "en": "Planned",
+    "zh-Hans": "已计划"
+  },
+  "Resolved": {
+    "en": "Resolved",
+    "zh-Hans": "已解决"
+  },
+  "Closed": {
+    "en": "Closed",
+    "zh-Hans": "已关闭"
+  },
+  "Unknown status": {
+    "en": "Unknown status",
+    "zh-Hans": "未知状态"
+  },
+  "Replies can contain up to 5,000 characters.": {
+    "en": "Replies can contain up to 5,000 characters.",
+    "zh-Hans": "回复最多为 5,000 字符。"
+  },
+  "Retry loading conversations": {
+    "en": "Retry loading conversations",
+    "zh-Hans": "重新载入反馈"
+  },
+  "Retry saving conversation": {
+    "en": "Retry saving conversation",
+    "zh-Hans": "重新保存会话"
+  },
+  "Start new feedback…": {
+    "en": "Start new feedback…",
+    "zh-Hans": "开始新的反馈…"
+  },
+  "Start new feedback?": {
+    "en": "Start new feedback?",
+    "zh-Hans": "开始新的反馈？"
+  },
+  "Start new feedback": {
+    "en": "Start new feedback",
+    "zh-Hans": "开始新反馈"
+  },
+  "Write a new reply…": {
+    "en": "Write a new reply…",
+    "zh-Hans": "撰写新回复…"
+  },
+  "Write a new reply?": {
+    "en": "Write a new reply?",
+    "zh-Hans": "撰写新的回复？"
+  },
+  "Write a new reply": {
+    "en": "Write a new reply",
+    "zh-Hans": "撰写新回复"
+  },
+  "The previous submission may already exist. Its draft will be cleared to avoid submitting it twice.": {
+    "en": "The previous submission may already exist. Its draft will be cleared to avoid submitting it twice.",
+    "zh-Hans": "上次反馈可能已送达。继续后将清空该草稿，避免重复提交。"
+  },
+  "The previous reply may still arrive. Its draft will be cleared to avoid sending it twice.": {
+    "en": "The previous reply may still arrive. Its draft will be cleared to avoid sending it twice.",
+    "zh-Hans": "上次回复可能仍会送达。继续后将清空该草稿，避免重复发送。"
+  },
+  "Enter a title of 3–160 characters, a description of 10–5,000 characters, and a valid email.": {
+    "en": "Enter a title of 3–160 characters, a description of 10–5,000 characters, and a valid email.",
+    "zh-Hans": "请填写 3–160 字符的标题、10–5,000 字符的描述及有效邮箱。"
+  },
+  "Support returned an invalid response. Please try refreshing.": {
+    "en": "Support returned an invalid response. Please try refreshing.",
+    "zh-Hans": "支持服务返回的数据无效，请刷新重试。"
+  },
+  "This support conversation is unavailable. Check your saved access credentials.": {
+    "en": "This support conversation is unavailable. Check your saved access credentials.",
+    "zh-Hans": "无法访问此反馈会话，请稍后重试或联系 support@monoware.app。"
+  },
+  "Support could not accept this content. Check the field lengths and email address.": {
+    "en": "Support could not accept this content. Check the field lengths and email address.",
+    "zh-Hans": "无法接收反馈，请检查内容长度及邮箱地址。"
+  },
+  "Support is unavailable right now. Please try again later.": {
+    "en": "Support is unavailable right now. Please try again later.",
+    "zh-Hans": "支持服务暂时不可用，请稍后再试。"
+  },
+  "Submission could not be confirmed. It may have reached support. Do not send the same feedback again immediately.": {
+    "en": "Submission could not be confirmed. It may have reached support. Do not send the same feedback again immediately.",
+    "zh-Hans": "暂时无法确认提交结果，反馈可能已送达，请勿立即重复提交。"
+  },
+  "Reply could not be confirmed. Refresh the conversation to check whether it arrived before sending again.": {
+    "en": "Reply could not be confirmed. Refresh the conversation to check whether it arrived before sending again.",
+    "zh-Hans": "暂时无法确认回复结果，请先刷新会话，确认是否送达后再发送。"
+  },
+  "The conversation could not be saved in Keychain. Keep this window open and retry saving; your feedback will not be submitted again.": {
+    "en": "The conversation could not be saved in Keychain. Keep this window open and retry saving; your feedback will not be submitted again.",
+    "zh-Hans": "会话无法保存到钥匙串，请保留此窗口并重试保存。应用不会再次提交该反馈。"
+  },
+  "App Language": {
+    "en": "App Language",
+    "zh-Hans": "应用语言"
+  },
+  "Language saved": {
+    "en": "Language saved",
+    "zh-Hans": "语言已保存"
+  },
+  "The new language will apply the next time you open the app.": {
+    "en": "The new language will apply the next time you open the app.",
+    "zh-Hans": "下次启动应用时将使用所选语言。"
+  },
+  "OK": {
+    "en": "OK",
+    "zh-Hans": "好"
+  }
+}

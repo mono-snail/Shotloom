@@ -1,0 +1,8 @@
+// Set the same state reached by the production “识别文字” button; no product UI changes.
+extension EditorView {
+    init(storeMaterialsApp app: AppCoordinator, store: CaptureStore, document: AnnotationDocument, record: CaptureRecord, parent: NSWindow) {
+        self.app=app;self.store=store;self.document=document;self.record=record;self.parent=parent
+        self._showText=State(initialValue:true)
+    }
+}
+
