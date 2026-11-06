@@ -2766,7 +2766,7 @@
 			"buildSettings" = {
 				"PRODUCT_NAME" = "Shotloom";
 				"PRODUCT_MODULE_NAME" = "DeskCapture";
-				"PRODUCT_BUNDLE_IDENTIFIER" = "app.monoware.shotloom";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.deskcapture.mac";
 				"DEVELOPMENT_TEAM" = "BDVY6CSEUU";
 				"CODE_SIGN_STYLE" = "Automatic";
 				"CODE_SIGN_ENTITLEMENTS" = "Resources/AppStore.entitlements";
@@ -2803,7 +2803,7 @@
 			"buildSettings" = {
 				"PRODUCT_NAME" = "Shotloom";
 				"PRODUCT_MODULE_NAME" = "DeskCapture";
-				"PRODUCT_BUNDLE_IDENTIFIER" = "app.monoware.shotloom";
+				"PRODUCT_BUNDLE_IDENTIFIER" = "com.deskcapture.mac";
 				"DEVELOPMENT_TEAM" = "BDVY6CSEUU";
 				"CODE_SIGN_STYLE" = "Automatic";
 				"CODE_SIGN_ENTITLEMENTS" = "Resources/AppStore.entitlements";

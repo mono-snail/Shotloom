@@ -142,14 +142,14 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate
         }.store(in: &subscriptions)
         makeApplicationMenu()
         coordinator.updates.blockReason = { [weak coordinator] in coordinator?.updateBlockReason }
-        let gate = ScreenCapturePermissionController(app: coordinator) { [weak self] in self?.finishPermissionSetup() }
+        let gate = ScreenCapturePermissionController(app: coordinator) { [weak self] in self?.finishInterfaceSetup() }
         permissionGate = gate
-        coordinator.requirePermission = { [weak gate] in gate?.allowEntry() ?? true }
+        coordinator.requireScreenCapturePermission = { [weak gate] in gate?.allowEntry() ?? true }
         coordinator.permissionWasDenied = { [weak gate] in gate?.requireSetup() }
+        gate.start()
         if AppPreferences.isInteractivePermissionReview { gate.requireSetup() }
-        else { gate.start() }
     }
-    private func finishPermissionSetup() {
+    private func finishInterfaceSetup() {
         coordinator.updates.startIfConfigured()
         if !pendingOpenURLs.isEmpty {
             let urls = pendingOpenURLs; pendingOpenURLs = []
@@ -166,7 +166,7 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate
         }
     }
     @objc private func toggleStatusMenu() {
-        guard permissionGate?.allowEntry() != false, let button = statusItem.button else { return }
+        guard let button = statusItem.button else { return }
         launchGuide.dismiss()
         if NSApp.currentEvent?.type == .rightMouseUp {
             statusMenu.close()
@@ -264,12 +264,11 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate
     }
     @objc private func saveScrolling() { coordinator.saveScrollCapture() }
     @objc private func quit() { NSApp.terminate(nil) }
-    @objc private func openSupport() { guard permissionGate?.allowEntry() != false else { return }; ShotloomSupportWindow.shared.show() }
-    @objc private func openPrivacyPolicy() { guard permissionGate?.allowEntry() != false else { return }; NSWorkspace.shared.open(AppSupport.privacyURL) }
-    @objc private func checkForUpdates() { guard permissionGate?.allowEntry() != false else { return }; coordinator.updates.checkForUpdates() }
+    @objc private func openSupport() { ShotloomSupportWindow.shared.show() }
+    @objc private func openPrivacyPolicy() { NSWorkspace.shared.open(AppSupport.privacyURL) }
+    @objc private func checkForUpdates() { coordinator.updates.checkForUpdates() }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        guard permissionGate?.allowEntry() != false else { return true }
         // A normal reactivation must preserve an existing editor or menu.
         if flag || statusMenu?.popover.isShown == true { return true }
         showLaunchGuide(); return true
@@ -287,7 +286,6 @@ final class ApplicationDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate
     func applicationDidBecomeActive(_ notification: Notification) { permissionGate?.applicationDidBecomeActive() }
     func application(_ application: NSApplication, open urls: [URL]) {
         guard let coordinator else { pendingOpenURLs.append(contentsOf: urls.prefix(max(0, 20 - pendingOpenURLs.count))); return }
-        guard permissionGate?.allowEntry() != false else { pendingOpenURLs.append(contentsOf: urls.prefix(max(0, 20 - pendingOpenURLs.count))); return }
         for url in urls {
             if url.isFileURL, ["deskvideo", "desktutorial"].contains(url.pathExtension.lowercased()) { coordinator.openPortableProject(url); continue }
             guard let command = CaptureURLCommand(url) else { continue }

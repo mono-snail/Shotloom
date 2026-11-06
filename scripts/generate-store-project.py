@@ -95,7 +95,8 @@ for name in ['Debug', 'Release']:
     }))
     target_configs.append(add('target:' + name, 'XCBuildConfiguration', name=name, buildSettings={
         'PRODUCT_NAME': 'Shotloom', 'PRODUCT_MODULE_NAME': 'DeskCapture',
-        'PRODUCT_BUNDLE_IDENTIFIER': 'app.monoware.shotloom', 'DEVELOPMENT_TEAM': 'BDVY6CSEUU',
+        # Preserve the identity of the existing App Store Connect app record.
+        'PRODUCT_BUNDLE_IDENTIFIER': 'com.deskcapture.mac', 'DEVELOPMENT_TEAM': 'BDVY6CSEUU',
         'CODE_SIGN_STYLE': 'Automatic', 'CODE_SIGN_ENTITLEMENTS': 'Resources/AppStore.entitlements',
         'ENABLE_APP_SANDBOX': 'YES', 'ENABLE_HARDENED_RUNTIME': 'YES',
         'ENABLE_USER_SCRIPT_SANDBOXING': 'NO', 'GENERATE_INFOPLIST_FILE': 'NO',

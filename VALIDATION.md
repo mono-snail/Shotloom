@@ -1,10 +1,17 @@
-# Validation on 2026 11 06
+# Validation on 2026-11-06
 
-- SwiftPM development build and host tests: 605 XCTest cases, zero failures. Dependency resolution was disabled and cached artifacts were used.
-- Python host checks: 35 tests, passed.
-- Xcode `APP_STORE` Debug build: succeeded for generic macOS, with code signing disabled. The first attempt failed because the generated project omitted `AppDistribution.swift`; regenerating the project included that source and the final build succeeded.
-- Current source uses `app.monoware.shotloom` for store/development identity. This is not an archive/upload or permission migration result.
+## Current build: 1.0 (57)
 
-This does not verify recording/camera hardware lifecycle, new-identity TCC permissions, signed installation, App Store provisioning, notarization, payment, licensing, or every end-user scenario. No current signed-app full hardware diagnostic was completed. No iOS simulator or model download was used for this validation.
+- Screen access is checked at screen-capture entry points. Local editing, workflow configuration, settings and support no longer require screen access; startup no longer captures screen pixels to verify access. The recovery window can be dismissed.
+- Signed Mac App Store Release archive: succeeded for Apple silicon, macOS 15 or later. Existing store identity: `com.deskcapture.mac`; development identity: `app.monoware.shotloom`.
+- `codesign --verify --deep --strict`: passed.
+- App Store Connect upload: succeeded on 2026-11-06; Apple accepted the package for processing. The web build list did not load, so processing completion and build selection were not confirmed. No review submission was made.
+- Upload warnings: dSYMs were missing for ShotloomRelaunch, whisper-cli and desk-voice, limiting symbolication of those helpers. The application upload succeeded.
+- Current Debug app was opened with isolated preferences and a temporary data directory. The main panel and settings displayed. Screen access was already available on the host, so a fully denied-permission scenario was not exercised.
+- Automated tests and full hardware diagnostics were not rerun after the latest permission changes, per the owner's instructions. No simulator or model download was used.
 
-The source currently published is a snapshot for inspection, not the exact source tree of every historical submitted build. The latest rejection was observed in App Store Connect against 1.0 (56), under the previous bundle identifier. Owner-only testing is not independent external beta testing.
+## Earlier snapshot checks
+
+Before the permission-scope changes, the source passed 605 Swift XCTest cases and 35 Python tests, using cached dependencies. An unsigned generic macOS APP_STORE Debug build also succeeded after regenerating a project that had omitted AppDistribution.swift. These prior checks are not test results for build 57.
+
+No current full signed-app recording/camera hardware diagnostic was completed. Signed installation, every permission scenario, notarization, payment and licensing are not established by these results. Internal developer testing is not external beta testing. The public source is not an assertion that every historical submitted binary matches the current tree.

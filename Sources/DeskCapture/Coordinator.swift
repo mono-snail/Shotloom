@@ -47,8 +47,8 @@ final class AppCoordinator: ObservableObject {
     private let engine = CaptureEngine()
     @Published var isCapturing = false
     @Published var permission = CaptureEngine.hasPermission
-    // Installed only for the interactive app; isolated diagnostics retain their own entry points.
-    var requirePermission: (() -> Bool)?
+    // Only live screen acquisition requires this permission; local files and navigation do not.
+    var requireScreenCapturePermission: (() -> Bool)?
     var permissionWasDenied: (() -> Void)?
     @Published var notice: String?
     @Published var shortcut = HotKeyPreset(rawValue: AppPreferences.standard.integer(forKey: "hotKeyPreset")) ?? .commandShift2
@@ -264,7 +264,6 @@ final class AppCoordinator: ObservableObject {
     }
 
     func showDashboard() {
-        guard requirePermission?() != false else { return }
         if dashboard == nil {
             let window = LauncherPanel(contentRect: CGRect(x: 0, y: 0, width: 328, height: 422),
                                   styleMask: [.borderless], backing: .buffered, defer: false)
@@ -289,7 +288,6 @@ final class AppCoordinator: ObservableObject {
     func hideDashboard() { dashboard?.orderOut(nil) }
 
     func showDevices() {
-        guard requirePermission?() != false else { return }
         if deviceWindow == nil {
             let window = DeviceRecordingWindow(recorder: deviceRecorder)
             window.center(); deviceWindow = window
@@ -297,7 +295,6 @@ final class AppCoordinator: ObservableObject {
         dashboard?.orderOut(nil); NSApp.activate(ignoringOtherApps: true); deviceWindow?.makeKeyAndOrderFront(nil)
     }
     func showHistory() {
-        guard requirePermission?() != false else { return }
         if historyWindow == nil {
             let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 820, height: 650), styleMask: [.titled, .closable, .resizable, .fullSizeContentView], backing: .buffered, defer: false)
             window.title = L10n.text("捕获历史"); window.titleVisibility = .hidden; window.titlebarAppearsTransparent = true
@@ -308,7 +305,6 @@ final class AppCoordinator: ObservableObject {
         dashboard?.orderOut(nil); NSApp.activate(ignoringOtherApps: true); historyWindow?.makeKeyAndOrderFront(nil)
     }
     func showRecordings() {
-        guard requirePermission?() != false else { return }
         if recordingLibraryWindow == nil {
             let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 600, height: 460), styleMask: [.titled, .closable, .resizable, .fullSizeContentView], backing: .buffered, defer: false)
             window.title = L10n.text("录屏素材"); window.titleVisibility = .hidden; window.titlebarAppearsTransparent = true
@@ -319,7 +315,6 @@ final class AppCoordinator: ObservableObject {
         dashboard?.orderOut(nil); NSApp.activate(ignoringOtherApps: true); recordingLibraryWindow?.makeKeyAndOrderFront(nil)
     }
     func showSettings() {
-        guard requirePermission?() != false else { return }
         if settingsWindow == nil {
             let window = NSWindow(contentRect: CGRect(x: 0, y: 0, width: 840, height: 680), styleMask: [.titled, .closable, .resizable, .fullSizeContentView], backing: .buffered, defer: false)
             window.contentMinSize = StudioMetrics.settingsMinimum
@@ -346,7 +341,7 @@ final class AppCoordinator: ObservableObject {
     func cancelWorkflowInput(_ id: UUID) { if workflowInputID == id { cancelCapture() } }
     @discardableResult func confirmWorkflowInputForDiagnostics() -> Bool { guard workflowInputID != nil else { return false }; return session?.confirmInputForDiagnostics() ?? false }
     func start(_ mode: CaptureMode, delay: Int = 0, repeatSelection: Bool = false, recordWindow: Bool = false, scrollDirection: ScrollDirection = .forward, inputOnly: Bool = false) {
-        guard requirePermission?() != false else { return }
+        guard requireScreenCapturePermission?() != false else { return }
         if let session { session.cancel(); return }
         guard !captureIsBusy else { return }
         guard NSApp.modalWindow == nil, !NSApp.windows.contains(where: { $0.attachedSheet != nil }) else {
@@ -650,7 +645,6 @@ final class AppCoordinator: ObservableObject {
     }
 
     func importImage() {
-        guard requirePermission?() != false else { return }
         let panel = NSOpenPanel(); panel.allowedContentTypes = [.image]; panel.allowsMultipleSelection = false
         NSApp.activate(ignoringOtherApps: true)
         panel.begin { [weak self] response in
@@ -672,7 +666,6 @@ final class AppCoordinator: ObservableObject {
         }
     }
     func editClipboard() {
-        guard requirePermission?() != false else { return }
         guard !isCapturing else { flash(L10n.text("请先完成当前截图。")); return }
         do {
             switch try ClipboardContent.read(imagePasteboard) {
@@ -765,7 +758,6 @@ final class AppCoordinator: ObservableObject {
         }
     }
     func importVideo() {
-        guard requirePermission?() != false else { return }
         NSApp.activate(ignoringOtherApps: true)
         let panel = NSOpenPanel(); panel.allowedContentTypes = [.movie, .deskVideoProject]; panel.allowsMultipleSelection = false
         panel.begin { [weak self] response in
@@ -775,12 +767,10 @@ final class AppCoordinator: ObservableObject {
         }
     }
     func importPortableProject() {
-        guard requirePermission?() != false else { return }
         let panel = NSOpenPanel(); panel.allowedContentTypes = [.deskVideoProject]; panel.allowsMultipleSelection = false
         panel.begin { [weak self] response in if response == .OK, let url = panel.url { self?.openPortableProject(url) } }
     }
     func openPortableProject(_ input: URL) {
-        guard requirePermission?() != false else { return }
         guard projectImportTask == nil else { flash(L10n.text("已有项目正在打开，可在进度窗口取消。")); projectImportPanel?.makeKeyAndOrderFront(nil); return }
         let panel = ProjectImportPanel(contentRect: CGRect(x: 0, y: 0, width: 340, height: 110), styleMask: [.titled, .closable], backing: .buffered, defer: false)
         panel.title = L10n.text("打开项目副本"); panel.isReleasedWhenClosed = false
@@ -1104,14 +1094,12 @@ final class AppCoordinator: ObservableObject {
         }
     }
     func showWorkflow(id: UUID? = nil, source: CGImage? = nil, runOnOpen: Bool = false) {
-        guard requirePermission?() != false else { return }
         Task {
             do { try await openWorkflow(id: id, source: source, runOnOpen: runOnOpen) }
             catch { showDashboard(); flash(L10n.text("无法打开流程：\(error.localizedDescription)")); showToast(L10n.text("流程无法打开"), symbol: "exclamationmark.triangle") }
         }
     }
     func openWorkflow(id: UUID? = nil, source: CGImage? = nil, runOnOpen: Bool = false) async throws {
-        guard requirePermission?() != false else { throw CaptureError.permission }
         let recipe: LocalWorkflowRecipe
         if let id {
             guard let saved = try await LocalWorkflowLibrary.shared.list().first(where: { $0.id == id }) else { throw CaptureError.message(L10n.text("没有找到该本地流程，请先保存后再使用启动链接。")) }
@@ -1138,7 +1126,6 @@ final class AppCoordinator: ObservableObject {
     }
 
     func showBeautifier(_ image: CGImage? = nil, watermark: ImageWatermark? = nil) {
-        guard requirePermission?() != false else { return }
         let window = BeautifyWindow(contentRect: CGRect(x: 0, y: 0, width: 960, height: 660),
                               styleMask: [.titled, .closable, .miniaturizable, .resizable],
                               backing: .buffered, defer: false)
@@ -1246,7 +1233,6 @@ final class AppCoordinator: ObservableObject {
         }
     }
     func importProject() {
-        guard requirePermission?() != false else { return }
         let panel = NSOpenPanel(); panel.message = L10n.text("选择 .deskcap 工程文件")
         panel.begin { [weak self] response in
             guard response == .OK, let url = panel.url, let self else { return }

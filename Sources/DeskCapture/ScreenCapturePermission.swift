@@ -1,8 +1,8 @@
 import AppKit
 import SwiftUI
 
-/// A launch gate, not a capture-time warning. Once this process finds access
-/// unavailable, setup stays visible until the user restarts the application.
+/// Recovery help for user-initiated screen capture, not a gate on the app.
+/// Opens System Settings; this is not a pre-alert that triggers a system dialog.
 @MainActor
 final class ScreenCapturePermissionController: NSObject, ObservableObject, NSWindowDelegate {
     @Published private(set) var checking = false
@@ -27,13 +27,15 @@ final class ScreenCapturePermissionController: NSObject, ObservableObject, NSWin
     }
 
     func start() {
-        app?.permission = false
-        guard CaptureEngine.hasPermission else { requireSetup(); return }
-        confirmLaunchAccess()
+        ready = CaptureEngine.hasPermission
+        app?.permission = ready
+        // Local media, settings and support remain available without screen access.
+        // Do not acquire screen pixels simply because the app was launched.
+        onReady()
     }
 
     @discardableResult func allowEntry() -> Bool {
-        guard ready else { show(); return false }
+        guard ready && CaptureEngine.hasPermission else { requireSetup(); return false }
         return true
     }
 
@@ -47,15 +49,14 @@ final class ScreenCapturePermissionController: NSObject, ObservableObject, NSWin
     }
 
     func applicationDidBecomeActive() {
-        guard !ready, !restarting, window != nil else { return }
-        // Returning from Settings never bypasses the required restart step.
-        show()
+        // No repeated guide presentation or screen acquisition on activation.
+        app?.permission = ready && CaptureEngine.hasPermission
     }
 
     private func show() {
         if window == nil {
             let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 560, height: 420),
-                                  styleMask: [.titled], backing: .buffered, defer: false)
+                                  styleMask: [.titled, .closable], backing: .buffered, defer: false)
             window.title = L10n.text("屏幕捕获权限")
             window.isReleasedWhenClosed = false
             window.contentMinSize = NSSize(width: 560, height: 420)
@@ -68,7 +69,23 @@ final class ScreenCapturePermissionController: NSObject, ObservableObject, NSWin
         window?.makeKeyAndOrderFront(nil)
     }
 
-    func windowShouldClose(_ sender: NSWindow) -> Bool { ready }
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        guard !restarting else { return false }
+        checkGeneration = UUID()
+        checkTask?.cancel(); checkTask = nil; checking = false
+        return true
+    }
+
+    func dismiss() { window?.performClose(nil) }
+
+    func recheckAccess() {
+        guard !restarting, !checking else { return }
+        guard CaptureEngine.hasPermission else {
+            issue = L10n.text("请先在系统设置中开启屏幕录制权限。")
+            return
+        }
+        confirmCaptureAccess()
+    }
 
     func openSettings() {
         guard !restarting, !checking else { return }
@@ -86,7 +103,7 @@ final class ScreenCapturePermissionController: NSObject, ObservableObject, NSWin
         NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
     }
 
-    private func confirmLaunchAccess() {
+    private func confirmCaptureAccess() {
         guard checkTask == nil, !restarting else { return }
         checking = true
         issue = nil
@@ -101,7 +118,6 @@ final class ScreenCapturePermissionController: NSObject, ObservableObject, NSWin
                 self.ready = true
                 self.app?.permission = true
                 self.window?.orderOut(nil)
-                self.onReady()
             } catch {
                 guard let self, !Task.isCancelled, self.checkGeneration == generation else { return }
                 self.checking = false
@@ -116,8 +132,8 @@ final class ScreenCapturePermissionController: NSObject, ObservableObject, NSWin
 
     func restart() {
         guard !restarting else { return }
-        // The initial setup has no documents. If permission is revoked later,
-        // preserve in-flight work and editors instead of terminating them.
+        // Local editing is available without screen access. Preserve in-flight
+        // work and editors instead of terminating them during permission recovery.
         if let reason = app?.updateBlockReason { issue = reason; return }
         restarting = true
         checkGeneration = UUID()
@@ -204,7 +220,7 @@ private struct ScreenCapturePermissionView: View {
                     Label(L10n.text("当前没有可用的屏幕录制权限"), systemImage: "exclamationmark.circle")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Palette.ice)
-                    Text(L10n.text("\(AppIdentity.name) 需要这项权限来获取屏幕截图。开启权限并重启应用后，才能开始使用。"))
+                    Text(L10n.text("截取屏幕和录制屏幕需要屏幕录制权限。你仍可导入和编辑本地文件、配置流程及查看设置。"))
                         .fixedSize(horizontal: false, vertical: true)
                     VStack(alignment: .leading, spacing: 12) {
                         Text(L10n.text("1. 在系统设置中开启权限"))
@@ -220,7 +236,7 @@ private struct ScreenCapturePermissionView: View {
                             }
                             .padding(.top, 8)
                         }
-                        Text(L10n.text("2. 退出并重新打开应用"))
+                        Text(L10n.text("2. 检查权限，必要时重启应用"))
                             .fontWeight(.semibold)
                         Text(L10n.text("若系统提示“退出并重新打开”，按提示操作即可；若选择了“稍后”，请回到这里点击“重启应用”。无需重启电脑。"))
                             .fixedSize(horizontal: false, vertical: true)
@@ -238,9 +254,11 @@ private struct ScreenCapturePermissionView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         } actions: {
-            Button(L10n.text("退出")) { NSApp.terminate(nil) }
-                .keyboardShortcut("q", modifiers: .command)
+            Button(L10n.text("稍后")) { controller.dismiss() }
+                .keyboardShortcut(.cancelAction)
             Spacer()
+            Button(L10n.text("重新检查权限")) { controller.recheckAccess() }
+                .disabled(controller.restarting || controller.checking)
             Button(L10n.text("重启应用")) { controller.restart() }
                 .disabled(controller.restarting)
             Button(L10n.text("打开系统设置")) { controller.openSettings() }

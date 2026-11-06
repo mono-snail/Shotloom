@@ -2813,3 +2813,11 @@
 "点击列表下方的“+”，添加当前安装的 {0}，然后开启权限。" = "Click the + below the list, add this installation of {0}, then enable access.";
 
 "在访达中显示此应用" = "Show This App in Finder";
+
+"截取屏幕和录制屏幕需要屏幕录制权限。你仍可导入和编辑本地文件、配置流程及查看设置。" = "Screen capture and recording need Screen Recording access. You can still import and edit local files, configure workflows, and open settings.";
+
+"2. 检查权限，必要时重启应用" = "2. Check access and restart the app if needed";
+
+"请先在系统设置中开启屏幕录制权限。" = "Turn on Screen Recording access in System Settings first.";
+
+"稍后" = "Later";

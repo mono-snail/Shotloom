@@ -39,11 +39,11 @@ SwiftPM resolves the pinned Sparkle binary dependency. Bundled speech and voice 
 
 For a Mac App Store build, use `Shotloom.xcodeproj`, scheme `Shotloom`, and your own valid signing/provisioning configuration. The generated project can be refreshed using `python3 scripts/generate-store-project.py`. The store helper build phase requires locally prepared voice/speech binaries. `APP_STORE` excludes Sparkle's updater. `DIRECT_DISTRIBUTION` is a separate distribution channel, not a payment or licensing implementation.
 
-Current local store/development bundle ID: `app.monoware.shotloom`. Earlier submitted builds used `com.deskcapture.mac`; changing a local bundle ID does not change an existing App Store Connect record. The public snapshot is current source, not an assertion that every line matches an earlier submitted binary.
+The existing Mac App Store product retains `com.deskcapture.mac` so updates remain attached to its existing App Store Connect record. The development bundle ID is `app.monoware.shotloom`. Version 1.0 build 57 includes the current permission-scope changes; it was archived and uploaded on 2026-11-06. Uploading a build does not submit it for review.
 
 ## Verification
 
-On 2026-11-06, this source passed 605 Swift tests and 35 Python tests on the developer's Mac. These are owner/developer checks, not independent external beta feedback. They do not establish that every hardware, permission or distribution scenario works. See `VALIDATION.md` for the snapshot's actual build coverage.
+On 2026-11-06, the preceding source snapshot passed 605 Swift tests and 35 Python tests. Tests were not rerun after the subsequent permission-scope changes. The current build 57 passed signed Release archiving and signature verification and was accepted for processing by App Store Connect. See `VALIDATION.md` for coverage and limitations. These are internal checks, not external beta feedback.
 
 ## Dependencies and origin
 
